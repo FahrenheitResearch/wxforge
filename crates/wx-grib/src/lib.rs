@@ -49,6 +49,17 @@ pub struct GribInventory {
     pub messages: Vec<MessageDescriptor>,
 }
 
+/// Flip rows in-place (reverses row order for bottom-to-top scan modes).
+fn flip_rows(values: &mut [f64], nx: usize, ny: usize) {
+    for j in 0..ny / 2 {
+        let top = j * nx;
+        let bot = (ny - 1 - j) * nx;
+        for i in 0..nx {
+            values.swap(top + i, bot + i);
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct DecodedField {
     pub descriptor: MessageDescriptor,
@@ -1358,6 +1369,16 @@ fn decode_grib1_message(
         dx_m: None,
         dy_m: None,
     };
+    // Flip rows if scan mode indicates bottom-to-top (bit 2 / 0x40)
+    if grid.scan_mode & 0x40 != 0 {
+        flip_rows(&mut values, grid.nx, grid.ny);
+    }
+
+    // Flip rows if scan mode indicates bottom-to-top (bit 2 / 0x40)
+    if grid.scan_mode & 0x40 != 0 {
+        flip_rows(&mut values, grid.nx, grid.ny);
+    }
+
     let (x_axis, y_axis) = build_axes(&grid);
     Ok(DecodedField {
         descriptor,
@@ -1566,6 +1587,11 @@ fn decode_grib2_message(
             grid.dy
         },
     };
+    // Flip rows if scan mode indicates bottom-to-top (bit 2 / 0x40)
+    if grid.scan_mode & 0x40 != 0 {
+        flip_rows(&mut values, grid.nx, grid.ny);
+    }
+
     let (x_axis, y_axis) = build_axes(&grid);
     Ok(DecodedField {
         descriptor,
