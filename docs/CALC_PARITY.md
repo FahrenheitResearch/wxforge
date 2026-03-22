@@ -1,12 +1,12 @@
 # Calc Parity
 
-`wxforge` is intended to port the full verified `metrust`/`MetPy` calc surface into native Rust.
+`wxtrain` is intended to port the full verified `metrust`/`MetPy` calc surface into native Rust.
 
 The canonical target inventory lives in:
 
-- [calc_inventory.txt](C:/Users/drew/wxforge/crates/wx-calc/src/calc_inventory.txt)
-- [ported_names.txt](C:/Users/drew/wxforge/crates/wx-calc/src/ported_names.txt)
-- [inventory.rs](C:/Users/drew/wxforge/crates/wx-calc/src/inventory.rs)
+- [calc_inventory.txt](C:/Users/drew/wxtrain/crates/wx-calc/src/calc_inventory.txt)
+- [ported_names.txt](C:/Users/drew/wxtrain/crates/wx-calc/src/ported_names.txt)
+- [inventory.rs](C:/Users/drew/wxtrain/crates/wx-calc/src/inventory.rs)
 
 The inventory is derived from the public `metrust.calc` export surface, not from ad hoc memory.
 
@@ -40,7 +40,7 @@ Category snapshot:
 
 ## Porting Rule
 
-`wx-calc` should not invent a new scientific surface. It should port the verified logic from [metrust-py](C:/Users/drew/metrust-py/python/metrust/calc/__init__.py) and then carry parity tests into `wxforge`.
+`wx-calc` should not invent a new scientific surface. It should port the verified logic from [metrust-py](C:/Users/drew/metrust-py/python/metrust/calc/__init__.py) and then carry parity tests into `wxtrain`.
 
 ## Regression Status
 
@@ -55,4 +55,4 @@ python examples\metpy_regression_suite.py
 
 Current regression docs:
 
-- [MetPy Regression](C:/Users/drew/wxforge/docs/METPY_REGRESSION.md)
+- [MetPy Regression](C:/Users/drew/wxtrain/docs/METPY_REGRESSION.md)

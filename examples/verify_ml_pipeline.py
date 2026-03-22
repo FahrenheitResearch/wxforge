@@ -114,10 +114,10 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     baseline_plan = read_json_from_stdout(
-        run(["cargo", "run", "-p", "wx-cli", "--bin", "wxforge", "--", "train", "plan", "--preset", "baseline"]).stdout
+        run(["cargo", "run", "-p", "wx-cli", "--bin", "wxtrain", "--", "train", "plan", "--preset", "baseline"]).stdout
     )
     radar_plan = read_json_from_stdout(
-        run(["cargo", "run", "-p", "wx-cli", "--bin", "wxforge", "--", "train", "plan", "--preset", "radar"]).stdout
+        run(["cargo", "run", "-p", "wx-cli", "--bin", "wxtrain", "--", "train", "plan", "--preset", "radar"]).stdout
     )
 
     sample_bundle = OUT_DIR / "sample_bundle"
@@ -134,7 +134,7 @@ def main() -> None:
             "-p",
             "wx-cli",
             "--bin",
-            "wxforge",
+            "wxtrain",
             "--",
             "train",
             "build-grib-sample",
@@ -153,7 +153,7 @@ def main() -> None:
             "-p",
             "wx-cli",
             "--bin",
-            "wxforge",
+            "wxtrain",
             "--",
             "train",
             "build-grib-dataset",
@@ -172,7 +172,7 @@ def main() -> None:
             "-p",
             "wx-cli",
             "--bin",
-            "wxforge",
+            "wxtrain",
             "--",
             "train",
             "build-grib-dataset",
@@ -191,7 +191,7 @@ def main() -> None:
             "-p",
             "wx-cli",
             "--bin",
-            "wxforge",
+            "wxtrain",
             "--",
             "train",
             "build-grib-dataset",
@@ -210,7 +210,7 @@ def main() -> None:
             "-p",
             "wx-cli",
             "--bin",
-            "wxforge",
+            "wxtrain",
             "--",
             "train",
             "build-grib-sample",
@@ -231,7 +231,7 @@ def main() -> None:
             "-p",
             "wx-cli",
             "--bin",
-            "wxforge",
+            "wxtrain",
             "--",
             "train",
             "job-init",
@@ -254,7 +254,7 @@ def main() -> None:
                 "-p",
                 "wx-cli",
                 "--bin",
-                "wxforge",
+                "wxtrain",
                 "--",
                 "train",
                 "job-plan",
@@ -271,7 +271,7 @@ def main() -> None:
                 "-p",
                 "wx-cli",
                 "--bin",
-                "wxforge",
+                "wxtrain",
                 "--",
                 "train",
                 "job-plan",
@@ -287,7 +287,7 @@ def main() -> None:
             "-p",
             "wx-cli",
             "--bin",
-            "wxforge",
+            "wxtrain",
             "--",
             "train",
             "job-build",

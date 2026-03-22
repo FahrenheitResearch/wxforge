@@ -51,7 +51,7 @@ struct Cli {
         default_value = "examples/severe_gfs_verify/gfs_pres_pressure.grib2"
     )]
     pres: PathBuf,
-    #[arg(long, default_value = "examples/severe_gfs_verify/wxforge_output")]
+    #[arg(long, default_value = "examples/severe_gfs_verify/wxtrain_output")]
     output_dir: PathBuf,
     #[arg(long, default_value_t = 30.0)]
     lat_min: f64,

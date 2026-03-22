@@ -3,7 +3,7 @@ name = "wx-radar"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Radar ingest, products, and detection interfaces for wxforge"
+description = "Radar ingest, products, and detection interfaces for wxtrain"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

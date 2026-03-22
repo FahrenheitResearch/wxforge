@@ -1,4 +1,4 @@
-//! Shared weather-domain types for the wxforge workspace.
+//! Shared weather-domain types for the wxtrain workspace.
 
 use serde::{Deserialize, Serialize};
 

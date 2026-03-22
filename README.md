@@ -1,4 +1,4 @@
-# wxforge
+# wxtrain
 
 All-Rust weather data pipeline for ML training. Fetches GRIB from operational NWP models, decodes natively, computes derived fields, and exports training-ready datasets.
 
@@ -8,39 +8,39 @@ All-Rust weather data pipeline for ML training. Fetches GRIB from operational NW
 
 ```bash
 git clone <repo-url>
-cd wxforge
+cd wxtrain
 cargo build --release
 ```
 
-The binary lands at `target/release/wxforge`.
+The binary lands at `target/release/wxtrain`.
 
 ```bash
 # List supported models
-wxforge models
+wxtrain models
 
 # Fetch a single HRRR field via byte-range subset (~325 KB instead of ~80 MB)
-wxforge fetch model-subset \
+wxtrain fetch model-subset \
   --model hrrr --product surface --forecast-hour 0 \
   --search "TMP:2 m above ground" \
   --output hrrr_tmp2m.grib2 --limit 1
 
 # See what's in it
-wxforge scan-grib --file hrrr_tmp2m.grib2
+wxtrain scan-grib --file hrrr_tmp2m.grib2
 
 # Decode message 1
-wxforge decode-grib --file hrrr_tmp2m.grib2 --message 1
+wxtrain decode-grib --file hrrr_tmp2m.grib2 --message 1
 
 # Render to PNG
-wxforge render grib --file hrrr_tmp2m.grib2 --message 1 \
+wxtrain render grib --file hrrr_tmp2m.grib2 --message 1 \
   --output hrrr_tmp2m.png --colormap heat
 
 # Download full GRIBs in parallel (24 forecast hours, 4 concurrent)
-wxforge fetch batch \
+wxtrain fetch batch \
   --model hrrr --product surface \
   --forecast-hours 0-23 --output-dir ./hrrr_data/ --parallelism 4
 
 # Compute thermodynamic quantities
-wxforge calc thermo --temperature-c 20 --dewpoint-c 10 --pressure-hpa 850
+wxtrain calc thermo --temperature-c 20 --dewpoint-c 10 --pressure-hpa 850
 ```
 
 ## Supported Models
@@ -87,17 +87,17 @@ The pipeline goes from raw GRIB to GPU-ready tensors. Job planning is architectu
 
 ```bash
 # 1. Create a job spec
-wxforge train job-init \
+wxtrain train job-init \
   --output job.json \
   --architecture swin-transformer \
   --task forecasting \
   --dataset-name hrrr_forecast
 
 # 2. Expand to full training plan (features, shards, model recipe)
-wxforge train job-plan --spec job.json
+wxtrain train job-plan --spec job.json
 
 # 3. Build NPY arrays from GRIB files
-wxforge train build-grib-sample \
+wxtrain train build-grib-sample \
   --file hrrr_surface.grib2 \
   --output-dir training_data/ \
   --colormap heat
@@ -116,18 +116,18 @@ Four end-to-end examples in `examples/training/`, each tested on a fresh Linux n
 | `train_swin.py` | 3-hour forecast | Swin Transformer |
 | `train_diffusion.py` | Super-resolution | Diffusion model |
 
-Each script calls `wxforge fetch batch` and `wxforge train build-grib-sample` to build its own dataset, then trains with PyTorch.
+Each script calls `wxtrain fetch batch` and `wxtrain train build-grib-sample` to build its own dataset, then trains with PyTorch.
 
 ## Python Integration
 
-The `wxforge_data` package provides PyTorch dataset loaders for wxforge-exported data.
+The `wxtrain_data` package provides PyTorch dataset loaders for wxtrain-exported data.
 
 ```bash
 pip install -e python/
 ```
 
 ```python
-from wxforge_data import WxforgeDataset, WxforgeMultiSampleDataset
+from wxtrain_data import WxforgeDataset, WxforgeMultiSampleDataset
 
 # Single sample bundle
 ds = WxforgeDataset("training_data/sample_bundle")
@@ -136,23 +136,23 @@ ds = WxforgeDataset("training_data/sample_bundle")
 ds = WxforgeMultiSampleDataset("training_data/")
 ```
 
-The Python package reads NPY/JSON artifacts produced by `wxforge train build-*` and does not depend on the wxforge binary at runtime.
+The Python package reads NPY/JSON artifacts produced by `wxtrain train build-*` and does not depend on the wxtrain binary at runtime.
 
 ## CLI Reference
 
 | Command | Description |
 |---------|-------------|
-| `wxforge models` | List all supported models with grid specs and sources |
-| `wxforge fetch model-subset` | Download specific fields via byte-range `.idx` requests |
-| `wxforge fetch model-download` | Download a complete GRIB file (supports ERA5 CDS auth) |
-| `wxforge fetch batch` | Download full GRIBs for multiple forecast hours in parallel |
-| `wxforge scan-grib` | List every message in a GRIB file |
-| `wxforge decode-grib` | Decode a message and print grid geometry, stats, sample values |
-| `wxforge calc thermo` | Compute thermodynamic quantities from a single observation |
-| `wxforge render grib` | Render a decoded GRIB message to georeferenced PNG |
-| `wxforge train job-init` | Create an ML job spec for a given architecture and task |
-| `wxforge train job-plan` | Expand a job spec into a full training plan |
-| `wxforge train build-grib-sample` | Build NPY arrays from decoded GRIB fields |
+| `wxtrain models` | List all supported models with grid specs and sources |
+| `wxtrain fetch model-subset` | Download specific fields via byte-range `.idx` requests |
+| `wxtrain fetch model-download` | Download a complete GRIB file (supports ERA5 CDS auth) |
+| `wxtrain fetch batch` | Download full GRIBs for multiple forecast hours in parallel |
+| `wxtrain scan-grib` | List every message in a GRIB file |
+| `wxtrain decode-grib` | Decode a message and print grid geometry, stats, sample values |
+| `wxtrain calc thermo` | Compute thermodynamic quantities from a single observation |
+| `wxtrain render grib` | Render a decoded GRIB message to georeferenced PNG |
+| `wxtrain train job-init` | Create an ML job spec for a given architecture and task |
+| `wxtrain train job-plan` | Expand a job spec into a full training plan |
+| `wxtrain train build-grib-sample` | Build NPY arrays from decoded GRIB fields |
 
 ## Timings
 

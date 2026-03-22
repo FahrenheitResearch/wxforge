@@ -1,6 +1,6 @@
 # Model Coverage
 
-This file tracks what `wxforge` can currently do for major training-relevant models.
+This file tracks what `wxtrain` can currently do for major training-relevant models.
 
 Status labels:
 

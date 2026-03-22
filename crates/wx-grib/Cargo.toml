@@ -3,7 +3,7 @@ name = "wx-grib"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "GRIB inventory and decode interfaces for wxforge"
+description = "GRIB inventory and decode interfaces for wxtrain"
 
 [dependencies]
 dicom-toolkit-jpeg2000 = { version = "0.4.0", default-features = false, features = ["std"] }

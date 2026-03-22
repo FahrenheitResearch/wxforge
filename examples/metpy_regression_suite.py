@@ -406,7 +406,7 @@ def build_cases() -> dict[str, Case]:
 
 
 def parse_args(case_names: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run thresholded wxforge-vs-MetPy regression cases.")
+    parser = argparse.ArgumentParser(description="Run thresholded wxtrain-vs-MetPy regression cases.")
     parser.add_argument(
         "--case",
         action="append",

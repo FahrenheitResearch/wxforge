@@ -1,6 +1,6 @@
 # Agent Jobs
 
-`wxforge` now has a canonical agent-facing job layer for dataset and model planning.
+`wxtrain` now has a canonical agent-facing job layer for dataset and model planning.
 
 The goal is to let an agent take a high-level request such as:
 
@@ -13,19 +13,19 @@ and translate it into deterministic manifests instead of hand-managed ad hoc con
 Initialize a starter job spec:
 
 ```powershell
-cargo run -p wx-cli --bin wxforge -- train job-init --output examples\agent_job_swin.json --architecture swin-transformer --task forecasting --dataset-name hrrr_swin_demo
+cargo run -p wx-cli --bin wxtrain -- train job-init --output examples\agent_job_swin.json --architecture swin-transformer --task forecasting --dataset-name hrrr_swin_demo
 ```
 
 Plan the dataset and model recipe:
 
 ```powershell
-cargo run -p wx-cli --bin wxforge -- train job-plan --spec examples\agent_job_swin.json
+cargo run -p wx-cli --bin wxtrain -- train job-plan --spec examples\agent_job_swin.json
 ```
 
 Build a dataset directly when the job spec uses `existing_grib_files`:
 
 ```powershell
-cargo run -p wx-cli --bin wxforge -- train job-build --spec examples\agent_job_classical.json --output-dir examples\agent_classical_build --colormap heat
+cargo run -p wx-cli --bin wxtrain -- train job-build --spec examples\agent_job_classical.json --output-dir examples\agent_classical_build --colormap heat
 ```
 
 ## Job Spec Shape

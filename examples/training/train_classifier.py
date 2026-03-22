@@ -6,8 +6,8 @@ to classify severe convective potential (CAPE > 1000 J/kg).
 
 Features: max CAPE, mean CAPE, max wind speed, mean T, mean Td, T-Td spread.
 
-Uses `wxforge fetch batch` for reliable full-GRIB downloads, then
-`wxforge train build-grib-sample` to decode individual fields to NPY.
+Uses `wxtrain fetch batch` for reliable full-GRIB downloads, then
+`wxtrain train build-grib-sample` to decode individual fields to NPY.
 
 Usage:  python train_classifier.py [--hours 24] [--epochs 10]
 """
@@ -17,17 +17,17 @@ import torch, torch.nn as nn, torch.optim as optim
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 HOME = os.path.expanduser("~")
-WORK = os.path.join(HOME, "wxforge_training", "train_classifier")
+WORK = os.path.join(HOME, "wxtrain_training", "train_classifier")
 
-def find_wxforge():
-    for c in [shutil.which("wxforge"),
-              os.path.join(HOME, "wxforge", "target", "release", "wxforge.exe"),
-              os.path.join(HOME, "wxforge", "target", "release", "wxforge")]:
+def find_wxtrain():
+    for c in [shutil.which("wxtrain"),
+              os.path.join(HOME, "wxtrain", "target", "release", "wxtrain.exe"),
+              os.path.join(HOME, "wxtrain", "target", "release", "wxtrain")]:
         if c and os.path.isfile(c):
             return c
-    sys.exit("ERROR: wxforge binary not found.")
+    sys.exit("ERROR: wxtrain binary not found.")
 
-WXF = find_wxforge()
+WXF = find_wxtrain()
 
 def fetch_data(n_hours):
     grib_dir = os.path.join(WORK, "gribs")

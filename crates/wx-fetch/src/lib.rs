@@ -146,7 +146,7 @@ impl Default for FetchEngine {
 impl FetchEngine {
     pub fn new() -> Self {
         let client = Client::builder()
-            .user_agent("wxforge/0.1")
+            .user_agent("wxtrain/0.1")
             .build()
             .expect("reqwest client should initialize");
         Self { client }
@@ -1267,7 +1267,7 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .expect("time should move forward")
             .as_nanos();
-        let path = std::env::temp_dir().join(format!("wxforge_fetch_{suffix}.bin"));
+        let path = std::env::temp_dir().join(format!("wxtrain_fetch_{suffix}.bin"));
         fs::write(&path, b"abcdefghij").expect("temp file should write");
 
         let engine = FetchEngine::new();
@@ -1292,7 +1292,7 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .expect("time should move forward")
             .as_nanos();
-        let path = std::env::temp_dir().join(format!("wxforge_exists_{suffix}.txt"));
+        let path = std::env::temp_dir().join(format!("wxtrain_exists_{suffix}.txt"));
         fs::write(&path, b"ok").expect("temp file should write");
 
         let engine = FetchEngine::new();

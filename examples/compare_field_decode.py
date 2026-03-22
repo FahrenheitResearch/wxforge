@@ -19,7 +19,7 @@ def run(cmd: list[str]) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Compare a single decoded wxforge GRIB field against cfgrib.")
+    parser = argparse.ArgumentParser(description="Compare a single decoded wxtrain GRIB field against cfgrib.")
     parser.add_argument("--file", type=Path, required=True)
     parser.add_argument("--var", required=True, help="Data variable name as seen by cfgrib, e.g. t2m")
     parser.add_argument("--message", type=int, default=1)
@@ -73,9 +73,9 @@ def save_triptych(name: str, reference: np.ndarray, candidate: np.ndarray, out_d
         dlim = 1.0
 
     panels = [
-        ("wxforge", candidate, "viridis", vmin, vmax),
+        ("wxtrain", candidate, "viridis", vmin, vmax),
         ("cfgrib", reference, "viridis", vmin, vmax),
-        ("wxforge - cfgrib", diff, "coolwarm", -dlim, dlim),
+        ("wxtrain - cfgrib", diff, "coolwarm", -dlim, dlim),
     ]
     for ax, (title, data, cmap, lo, hi) in zip(axes, panels, strict=True):
         im = ax.imshow(data, origin="upper", cmap=cmap, vmin=lo, vmax=hi, aspect="auto")
@@ -114,7 +114,7 @@ def main() -> None:
     candidate = np.load(args.output_dir / "field.npy").astype(np.float64)
 
     if reference.shape != candidate.shape:
-        raise RuntimeError(f"shape mismatch: cfgrib={reference.shape} wxforge={candidate.shape}")
+        raise RuntimeError(f"shape mismatch: cfgrib={reference.shape} wxtrain={candidate.shape}")
 
     report = {
         "file": str(args.file),

@@ -1,4 +1,4 @@
-"""Smoke test for wxforge_data using an existing wxforge NPY export."""
+"""Smoke test for wxtrain_data using an existing wxtrain NPY export."""
 
 import sys
 from pathlib import Path
@@ -6,16 +6,16 @@ from pathlib import Path
 # Ensure the package is importable from this directory
 sys.path.insert(0, str(Path(__file__).parent))
 
-from wxforge_data import WxforgeDataset, WxforgeMultiSampleDataset, load_manifest
+from wxtrain_data import WxforgeDataset, WxforgeMultiSampleDataset, load_manifest
 
 
-DATA_DIR = Path(r"C:\Users\drew\AppData\Local\Temp\wxforge_dataset")
+DATA_DIR = Path(r"C:\Users\drew\AppData\Local\Temp\wxtrain_dataset")
 
 
 def main():
     if not DATA_DIR.exists():
         print(f"ERROR: data directory not found: {DATA_DIR}")
-        print("Run wxforge to materialize a dataset first.")
+        print("Run wxtrain to materialize a dataset first.")
         sys.exit(1)
 
     # 1. Load manifest

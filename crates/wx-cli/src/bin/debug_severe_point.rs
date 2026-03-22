@@ -15,7 +15,7 @@ const MAX_PRESSURE_HPA: f64 = 1000.0;
 
 #[derive(Debug, Parser)]
 #[command(name = "debug-severe-point")]
-#[command(about = "Dump wxforge severe-profile internals for a single cropped grid point")]
+#[command(about = "Dump wxtrain severe-profile internals for a single cropped grid point")]
 struct Cli {
     #[arg(
         long,

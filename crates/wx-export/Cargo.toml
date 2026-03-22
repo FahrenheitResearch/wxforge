@@ -3,7 +3,7 @@ name = "wx-export"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Dataset export interfaces for wxforge"
+description = "Dataset export interfaces for wxtrain"
 
 [dependencies]
 chrono = { version = "0.4", default-features = false, features = ["clock"] }

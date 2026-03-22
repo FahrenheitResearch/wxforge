@@ -3,7 +3,7 @@ name = "wx-types"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Shared domain model for wxforge"
+description = "Shared domain model for wxtrain"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

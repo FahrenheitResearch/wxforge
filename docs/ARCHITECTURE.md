@@ -2,7 +2,7 @@
 
 ## Goal
 
-`wxforge` is the canonical Rust workspace for end-to-end weather ingest, processing, radar analysis, rendering, and ML dataset export.
+`wxtrain` is the canonical Rust workspace for end-to-end weather ingest, processing, radar analysis, rendering, and ML dataset export.
 
 It replaces the current multi-repo drift problem with one crate graph and one ownership model.
 
@@ -19,7 +19,7 @@ Adapters can exist later, but the core must stay Rust-native and library-first.
 
 ### 1. Domain Layer
 
-Owned by [wx-types](C:/Users/drew/wxforge/crates/wx-types/src/lib.rs)
+Owned by [wx-types](C:/Users/drew/wxtrain/crates/wx-types/src/lib.rs)
 
 This crate defines the shared weather data model:
 
@@ -33,7 +33,7 @@ No network, no file decoding, no rendering.
 
 ### 2. Ingest Layer
 
-Owned by [wx-fetch](C:/Users/drew/wxforge/crates/wx-fetch/src/lib.rs) and [wx-grib](C:/Users/drew/wxforge/crates/wx-grib/src/lib.rs)
+Owned by [wx-fetch](C:/Users/drew/wxtrain/crates/wx-fetch/src/lib.rs) and [wx-grib](C:/Users/drew/wxtrain/crates/wx-grib/src/lib.rs)
 
 `wx-fetch` decides where to get bytes.
 
@@ -46,7 +46,7 @@ This split matters:
 
 ### 3. Scientific Layer
 
-Owned by [wx-calc](C:/Users/drew/wxforge/crates/wx-calc/src/lib.rs)
+Owned by [wx-calc](C:/Users/drew/wxtrain/crates/wx-calc/src/lib.rs)
 
 This is the canonical numerical truth layer.
 
@@ -54,7 +54,7 @@ Port here only after parity is proven against trusted references. Every calc sho
 
 ### 4. Radar Layer
 
-Owned by [wx-radar](C:/Users/drew/wxforge/crates/wx-radar/src/lib.rs)
+Owned by [wx-radar](C:/Users/drew/wxtrain/crates/wx-radar/src/lib.rs)
 
 Radar is treated as a first-class subsystem with its own:
 
@@ -66,7 +66,7 @@ Radar is treated as a first-class subsystem with its own:
 
 ### 5. Rendering Layer
 
-Owned by [wx-render](C:/Users/drew/wxforge/crates/wx-render/src/lib.rs)
+Owned by [wx-render](C:/Users/drew/wxtrain/crates/wx-render/src/lib.rs)
 
 This crate produces deterministic outputs:
 
@@ -78,7 +78,7 @@ This crate produces deterministic outputs:
 
 ### 6. Export Layer
 
-Owned by [wx-export](C:/Users/drew/wxforge/crates/wx-export/src/lib.rs)
+Owned by [wx-export](C:/Users/drew/wxtrain/crates/wx-export/src/lib.rs)
 
 This crate owns training-data output formats and dataset manifests.
 
@@ -86,7 +86,7 @@ The export layer should know nothing about NEXRAD internals or GRIB byte parsing
 
 ### 7. Pipeline Layer
 
-Owned by [wx-train](C:/Users/drew/wxforge/crates/wx-train/src/lib.rs)
+Owned by [wx-train](C:/Users/drew/wxtrain/crates/wx-train/src/lib.rs)
 
 This is where "turn weather data into model-ready examples" lives:
 
@@ -98,7 +98,7 @@ This is where "turn weather data into model-ready examples" lives:
 
 ### 8. Orchestration Layer
 
-Owned by [wx-cli](C:/Users/drew/wxforge/crates/wx-cli/src/main.rs)
+Owned by [wx-cli](C:/Users/drew/wxtrain/crates/wx-cli/src/main.rs)
 
 This is the one executable an operator or agent uses.
 

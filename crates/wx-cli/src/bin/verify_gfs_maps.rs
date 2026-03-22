@@ -10,7 +10,7 @@ use wx_types::Grid2D;
 
 #[derive(Debug, Parser)]
 #[command(name = "verify-gfs-maps")]
-#[command(about = "Decode GFS verification fields and dump wxforge map products as NPY")]
+#[command(about = "Decode GFS verification fields and dump wxtrain map products as NPY")]
 struct Cli {
     #[arg(long)]
     u500: PathBuf,

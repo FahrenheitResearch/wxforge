@@ -36,7 +36,7 @@ mod feature_materialize;
 
 #[derive(Debug, Parser)]
 #[command(
-    name = "wxforge",
+    name = "wxtrain",
     about = "Rust-first end-to-end weather and ML pipeline workspace"
 )]
 struct Cli {
@@ -394,7 +394,7 @@ fn main() -> Result<(), String> {
 
     match cli.command {
         Command::About => {
-            println!("wxforge is a fresh Rust-first weather and ML pipeline workspace.");
+            println!("wxtrain is a fresh Rust-first weather and ML pipeline workspace.");
             println!("It is designed to replace repo drift with one canonical crate graph.");
         }
         Command::Crates => {
@@ -610,7 +610,7 @@ fn main() -> Result<(), String> {
                 let results = rt.block_on(async {
                     let semaphore = Arc::new(tokio::sync::Semaphore::new(parallelism));
                     let client = reqwest::Client::builder()
-                        .user_agent("wxforge/0.1")
+                        .user_agent("wxtrain/0.1")
                         .build()
                         .map_err(|e| format!("failed to create async client: {e}"))?;
                     let completed = Arc::new(std::sync::atomic::AtomicUsize::new(0));
@@ -1944,7 +1944,7 @@ fn write_parquet_sample_rows(
     let schema = Arc::new(
         parse_message_type(
             "
-        message wxforge_dataset_shard {
+        message wxtrain_dataset_shard {
           REQUIRED BYTE_ARRAY sample_id (STRING);
           REQUIRED BYTE_ARRAY split (STRING);
           REQUIRED INT64 shard_index;

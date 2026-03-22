@@ -47,13 +47,13 @@ def summary_stats(reference: np.ndarray, candidate: np.ndarray) -> dict[str, flo
 
 
 def save_triptych(
-    name: str, lon: np.ndarray, lat: np.ndarray, wxforge: np.ndarray, metpy: np.ndarray, out_dir: Path
+    name: str, lon: np.ndarray, lat: np.ndarray, wxtrain: np.ndarray, metpy: np.ndarray, out_dir: Path
 ) -> None:
-    diff = wxforge - metpy
+    diff = wxtrain - metpy
     fig, axes = plt.subplots(1, 3, figsize=(15, 5), constrained_layout=True)
     extent = [float(lon.min()), float(lon.max()), float(lat.min()), float(lat.max())]
 
-    combined = np.concatenate([wxforge.ravel(), metpy.ravel()])
+    combined = np.concatenate([wxtrain.ravel(), metpy.ravel()])
     finite = combined[np.isfinite(combined)]
     if finite.size == 0:
         vmin = -1.0
@@ -70,9 +70,9 @@ def save_triptych(
         dlim = 1.0
 
     panels = [
-        ("wxforge", wxforge, "viridis", vmin, vmax),
+        ("wxtrain", wxtrain, "viridis", vmin, vmax),
         ("MetPy", metpy, "viridis", vmin, vmax),
-        ("wxforge - MetPy", diff, "coolwarm", -dlim, dlim),
+        ("wxtrain - MetPy", diff, "coolwarm", -dlim, dlim),
     ]
     for ax, (title, data, cmap, lo, hi) in zip(axes, panels, strict=True):
         im = ax.imshow(data, origin="upper", extent=extent, cmap=cmap, vmin=lo, vmax=hi, aspect="auto")
@@ -120,7 +120,7 @@ def interp_height_at_pressure(target_hpa: float, pressure_hpa: np.ndarray, heigh
 
 
 def build_paths(data_dir: Path) -> tuple[Path, Path, dict[str, Path]]:
-    wxforge_dir = data_dir / "wxforge_output"
+    wxtrain_dir = data_dir / "wxtrain_output"
     out_dir = data_dir / "metpy_compare"
     files = {
         "tmp": data_dir / "gfs_tmp_pressure.grib2",
@@ -130,11 +130,11 @@ def build_paths(data_dir: Path) -> tuple[Path, Path, dict[str, Path]]:
         "hgt": data_dir / "gfs_hgt_pressure.grib2",
         "pres": data_dir / "gfs_pres_pressure.grib2",
     }
-    return wxforge_dir, out_dir, files
+    return wxtrain_dir, out_dir, files
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Compare wxforge severe diagnostics with MetPy.")
+    parser = argparse.ArgumentParser(description="Compare wxtrain severe diagnostics with MetPy.")
     parser.add_argument(
         "--data-dir",
         type=Path,
@@ -149,9 +149,9 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def build_wxforge_outputs(
+def build_wxtrain_outputs(
     data_dir: Path,
-    wxforge_dir: Path,
+    wxtrain_dir: Path,
     files: dict[str, Path],
     lat_min: float,
     lat_max: float,
@@ -159,7 +159,7 @@ def build_wxforge_outputs(
     lon_max_360: float,
     sample_stride: int,
 ) -> None:
-    wxforge_dir.mkdir(parents=True, exist_ok=True)
+    wxtrain_dir.mkdir(parents=True, exist_ok=True)
     run(
         [
             "cargo",
@@ -182,7 +182,7 @@ def build_wxforge_outputs(
             "--pres",
             str(files["pres"]),
             "--output-dir",
-            str(wxforge_dir),
+            str(wxtrain_dir),
             "--lat-min",
             str(lat_min),
             "--lat-max",
@@ -216,10 +216,10 @@ def map_crop_indices(wx_lat: np.ndarray, wx_lon: np.ndarray, lat_axis: np.ndarra
 
 def main() -> None:
     args = parse_args()
-    wxforge_dir, out_dir, files = build_paths(args.data_dir)
-    build_wxforge_outputs(
+    wxtrain_dir, out_dir, files = build_paths(args.data_dir)
+    build_wxtrain_outputs(
         args.data_dir,
-        wxforge_dir,
+        wxtrain_dir,
         files,
         args.lat_min,
         args.lat_max,
@@ -240,8 +240,8 @@ def main() -> None:
     ds_orog = load_cfgrib(files["hgt"], {"typeOfLevel": "surface"})
     ds_sp = load_cfgrib(files["pres"], {"typeOfLevel": "surface"})
 
-    wx_lat = np.load(wxforge_dir / "latitude.npy").astype(np.float64)
-    wx_lon = np.load(wxforge_dir / "longitude.npy").astype(np.float64)
+    wx_lat = np.load(wxtrain_dir / "latitude.npy").astype(np.float64)
+    wx_lon = np.load(wxtrain_dir / "longitude.npy").astype(np.float64)
     lat_axis = ds_t.latitude.values.astype(np.float64)
     lon_axis = ds_t.longitude.values.astype(np.float64)
     y_indices, x_indices = map_crop_indices(wx_lat, wx_lon, lat_axis, lon_axis)
@@ -283,8 +283,8 @@ def main() -> None:
         "total_totals",
         "pwat",
     ]
-    wxforge_products = {
-        name: np.load(wxforge_dir / f"{name}.npy").astype(np.float64)
+    wxtrain_products = {
+        name: np.load(wxtrain_dir / f"{name}.npy").astype(np.float64)
         for name in fields
     }
     metpy_products = {name: np.full_like(wx_lat, np.nan, dtype=np.float64) for name in fields}
@@ -425,8 +425,8 @@ def main() -> None:
     report = {}
     out_dir.mkdir(parents=True, exist_ok=True)
     for name in fields:
-        report[name] = summary_stats(metpy_products[name], wxforge_products[name])
-        save_triptych(name, wx_lon, wx_lat, wxforge_products[name], metpy_products[name], out_dir)
+        report[name] = summary_stats(metpy_products[name], wxtrain_products[name])
+        save_triptych(name, wx_lon, wx_lat, wxtrain_products[name], metpy_products[name], out_dir)
 
     output = {"products": report}
     (out_dir / "comparison_summary.json").write_text(json.dumps(output, indent=2))

@@ -1,6 +1,6 @@
 # MetPy Regression
 
-`wxforge` now carries a thresholded regression suite against `MetPy` for the highest-value
+`wxtrain` now carries a thresholded regression suite against `MetPy` for the highest-value
 map and severe diagnostics that were recently ported and tuned.
 
 Current entrypoint:
@@ -11,9 +11,9 @@ python examples\metpy_regression_suite.py
 
 This suite runs the existing comparison harnesses and then enforces fixed tolerances:
 
-- [compare_gfs_with_metpy.py](C:/Users/drew/wxforge/examples/compare_gfs_with_metpy.py)
-- [compare_severe_profiles_with_metpy.py](C:/Users/drew/wxforge/examples/compare_severe_profiles_with_metpy.py)
-- [compare_thermo_profiles_with_metpy.py](C:/Users/drew/wxforge/examples/compare_thermo_profiles_with_metpy.py)
+- [compare_gfs_with_metpy.py](C:/Users/drew/wxtrain/examples/compare_gfs_with_metpy.py)
+- [compare_severe_profiles_with_metpy.py](C:/Users/drew/wxtrain/examples/compare_severe_profiles_with_metpy.py)
+- [compare_thermo_profiles_with_metpy.py](C:/Users/drew/wxtrain/examples/compare_thermo_profiles_with_metpy.py)
 
 Current covered cases:
 
@@ -35,7 +35,7 @@ Current covered cases:
 
 The suite writes:
 
-- combined report: [metpy_regression_report.json](C:/Users/drew/wxforge/examples/metpy_regression_report.json)
+- combined report: [metpy_regression_report.json](C:/Users/drew/wxtrain/examples/metpy_regression_report.json)
 - per-case comparison summaries in each example output directory
 
 Useful flags:

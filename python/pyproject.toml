@@ -3,9 +3,9 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "wxforge-data"
+name = "wxtrain-data"
 version = "0.1.0"
-description = "PyTorch dataset loaders for wxforge training data"
+description = "PyTorch dataset loaders for wxtrain training data"
 requires-python = ">=3.10"
 dependencies = ["torch", "numpy"]
 

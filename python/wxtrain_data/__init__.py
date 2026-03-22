@@ -1,11 +1,11 @@
-"""PyTorch dataset loaders for wxforge-exported training data.
+"""PyTorch dataset loaders for wxtrain-exported training data.
 
-This package reads the NPY/JSON artifacts that wxforge materializes
+This package reads the NPY/JSON artifacts that wxtrain materializes
 and presents them as standard ``torch.utils.data.Dataset`` objects.
-It does **not** depend on the wxforge binary at runtime.
+It does **not** depend on the wxtrain binary at runtime.
 """
 
-from wxforge_data.dataset import (
+from wxtrain_data.dataset import (
     WxforgeDataset,
     WxforgeMultiSampleDataset,
     load_manifest,

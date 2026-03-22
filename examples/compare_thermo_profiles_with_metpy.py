@@ -75,11 +75,11 @@ def main() -> None:
         ]
     )
 
-    payload = json.loads((OUT_DIR / "wxforge_thermo_cases.json").read_text())
-    wxforge_cases = {case["name"]: case for case in payload["cases"]}
+    payload = json.loads((OUT_DIR / "wxtrain_thermo_cases.json").read_text())
+    wxtrain_cases = {case["name"]: case for case in payload["cases"]}
     report: dict[str, dict[str, float]] = {}
 
-    for name, case in wxforge_cases.items():
+    for name, case in wxtrain_cases.items():
         pressure = np.asarray(case["profile"]["pressure_hpa"], dtype=np.float64) * units.hPa
         temperature = np.asarray(case["profile"]["temperature_c"], dtype=np.float64) * units.degC
         dewpoint = np.asarray(case["profile"]["dewpoint_c"], dtype=np.float64) * units.degC
@@ -125,11 +125,11 @@ def main() -> None:
             "parcel_profile_500_c": parcel_profile_500_c(pressure.magnitude, parcel_profile),
         }
 
-        wxforge_products = case["products"]
+        wxtrain_products = case["products"]
         report[name] = {
             product_name: summary_stats(
                 np.asarray([metpy_products[product_name]], dtype=np.float64),
-                np.asarray([wxforge_products[product_name]], dtype=np.float64),
+                np.asarray([wxtrain_products[product_name]], dtype=np.float64),
             )
             for product_name in metpy_products
         }

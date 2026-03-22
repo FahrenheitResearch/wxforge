@@ -1,6 +1,6 @@
-"""Core dataset implementations for wxforge NPY-directory exports.
+"""Core dataset implementations for wxtrain NPY-directory exports.
 
-wxforge materializes GRIB data into per-channel ``.npy`` files plus JSON
+wxtrain materializes GRIB data into per-channel ``.npy`` files plus JSON
 manifests (``sample_manifest.json`` and ``dataset_manifest.json``).  The
 classes here memory-map those arrays and serve random crops as PyTorch
 tensors, ready for DataLoader.
@@ -59,7 +59,7 @@ def load_manifest(data_dir: Union[str, Path]) -> Dict[str, Any]:
     Parameters
     ----------
     data_dir:
-        Directory containing wxforge NPY output and manifest JSON.
+        Directory containing wxtrain NPY output and manifest JSON.
 
     Returns
     -------
@@ -99,7 +99,7 @@ def _load_channel_stats(data_dir: Path) -> Optional[Dict[str, Dict[str, float]]]
 # ---------------------------------------------------------------------------
 
 class WxforgeDataset(Dataset):
-    """PyTorch Dataset over a single wxforge NPY-directory export.
+    """PyTorch Dataset over a single wxtrain NPY-directory export.
 
     Each item is a tuple ``(tensor, metadata)`` where *tensor* has shape
     ``(C, crop_size, crop_size)`` and *metadata* is a dict with keys such
@@ -348,7 +348,7 @@ class WxforgeDataset(Dataset):
 # ---------------------------------------------------------------------------
 
 class WxforgeMultiSampleDataset(Dataset):
-    """Concatenation of multiple wxforge sample directories.
+    """Concatenation of multiple wxtrain sample directories.
 
     Each directory should contain its own NPY files and manifest.  The
     resulting dataset presents a unified index over all samples with
@@ -357,7 +357,7 @@ class WxforgeMultiSampleDataset(Dataset):
     Parameters
     ----------
     sample_dirs:
-        List of paths, each pointing to a wxforge NPY-directory export.
+        List of paths, each pointing to a wxtrain NPY-directory export.
     channels:
         Optional channel filter (applied to every sub-dataset).
     crop_size:

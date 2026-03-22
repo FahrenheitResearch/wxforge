@@ -22,7 +22,7 @@ SECTIONS = {
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the full local wxforge verification stack.")
+    parser = argparse.ArgumentParser(description="Run the full local wxtrain verification stack.")
     parser.add_argument(
         "--section",
         action="append",

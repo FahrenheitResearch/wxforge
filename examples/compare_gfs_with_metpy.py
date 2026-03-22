@@ -56,7 +56,7 @@ def run(cmd: list[str]) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Compare pressure-level wxforge map diagnostics with MetPy.")
+    parser = argparse.ArgumentParser(description="Compare pressure-level wxtrain map diagnostics with MetPy.")
     parser.add_argument("--u500", type=Path, default=DEFAULT_FIELDS["u500"]["path"])
     parser.add_argument("--v500", type=Path, default=DEFAULT_FIELDS["v500"]["path"])
     parser.add_argument("--t850", type=Path, default=DEFAULT_FIELDS["t850"]["path"])
@@ -206,9 +206,9 @@ def save_triptych(
         dlim = 1.0
 
     panels = [
-        ("wxforge", rust, "viridis", vmin, vmax),
+        ("wxtrain", rust, "viridis", vmin, vmax),
         ("MetPy", metpy, "viridis", vmin, vmax),
-        ("wxforge - MetPy", diff, "coolwarm", -dlim, dlim),
+        ("wxtrain - MetPy", diff, "coolwarm", -dlim, dlim),
     ]
     for ax, (title, data, cmap, lo, hi) in zip(axes, panels, strict=True):
         im = ax.imshow(data, origin="upper", extent=extent, cmap=cmap, vmin=lo, vmax=hi, aspect="auto")

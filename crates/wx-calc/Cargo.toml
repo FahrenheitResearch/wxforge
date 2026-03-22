@@ -3,7 +3,7 @@ name = "wx-calc"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Canonical meteorological calculations for wxforge"
+description = "Canonical meteorological calculations for wxtrain"
 
 [dependencies]
 wx-types = { path = "../wx-types" }

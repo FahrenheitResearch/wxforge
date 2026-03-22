@@ -150,7 +150,7 @@ fn main() -> Result<(), String> {
 
     let report = json!({ "cases": output_cases });
     fs::write(
-        cli.output_dir.join("wxforge_thermo_cases.json"),
+        cli.output_dir.join("wxtrain_thermo_cases.json"),
         serde_json::to_string_pretty(&report)
             .map_err(|err| format!("failed to serialize thermo cases: {err}"))?,
     )

@@ -265,7 +265,7 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .expect("time should move forward")
             .as_nanos();
-        let path = std::env::temp_dir().join(format!("wxforge_grid_{suffix}.npy"));
+        let path = std::env::temp_dir().join(format!("wxtrain_grid_{suffix}.npy"));
 
         engine
             .write_npy_f32_grid(&path, &grid)

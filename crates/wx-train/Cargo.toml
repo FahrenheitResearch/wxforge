@@ -3,7 +3,7 @@ name = "wx-train"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Training dataset planning for wxforge"
+description = "Training dataset planning for wxtrain"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

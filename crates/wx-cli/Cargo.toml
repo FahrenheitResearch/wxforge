@@ -3,7 +3,7 @@ name = "wx-cli"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Single operator entrypoint for wxforge"
+description = "Single operator entrypoint for wxtrain"
 
 [dependencies]
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
@@ -23,5 +23,5 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
 
 [[bin]]
-name = "wxforge"
+name = "wxtrain"
 path = "src/main.rs"

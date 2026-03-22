@@ -3,7 +3,7 @@ name = "wx-fetch"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Source planning and byte fetch interfaces for wxforge"
+description = "Source planning and byte fetch interfaces for wxtrain"
 
 [dependencies]
 chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }
