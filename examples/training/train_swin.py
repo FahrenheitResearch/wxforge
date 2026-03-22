@@ -1,182 +1,213 @@
 """
-Swin Transformer for 6-Hour Weather Forecasting
+Swin Transformer for 3-Hour Weather Forecasting
 =================================================
-Trains a simplified Swin-like transformer to predict weather fields 6h ahead.
-Input/target: TMP:2m, DPT:2m, UGRD:10m, VGRD:10m, CAPE:surface.
-Architecture: patch embedding + 2 Swin blocks (window self-attention) + linear head.
+Trains a simplified Swin-like transformer to predict TMP + CAPE 3 hours ahead.
+Input: TMP:2m + CAPE:surface at time T (2 channels).
+Target: same fields at T+3h.
 
-Pipeline: wxforge fetches HRRR GRIB2 for fhr 0-18, pairs (T, T+6h) for training.
-Usage:  python train_swin.py
-Requires: torch, numpy, wxforge binary
+Architecture: PatchEmbed (8x8) + 2 SwinBlocks with MultiheadAttention + linear head.
+
+Uses `wxforge fetch batch` for reliable full-GRIB downloads, then
+`wxforge train build-grib-sample` to decode individual fields to NPY.
+
+Usage:  python train_swin.py [--hours 24] [--epochs 10] [--crop 256]
 """
-from __future__ import annotations
-import json, math, shutil, subprocess, sys
-from pathlib import Path
+import argparse, glob, os, shutil, subprocess, sys
 import numpy as np
-import torch, torch.nn as nn, torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
+import torch, torch.nn as nn, torch.optim as optim
 
-WORK_DIR = Path(__file__).resolve().parent / "_swin_workdir"
-FHRS = list(range(0, 19))
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-EPOCHS, BATCH_SIZE, LR, CROP = 5, 1, 3e-4, 128
-PATCH, NCH, EDIM, NHEAD, NBLK, WIN = 8, 5, 128, 4, 2, 4
-FIELDS = ["TMP:2 m above ground", "DPT:2 m above ground",
-          "UGRD:10 m above ground", "VGRD:10 m above ground", "CAPE:surface"]
-FKEYS = ["2t", "2d", "10u", "10v", "cape"]
+HOME = os.path.expanduser("~")
+WORK = os.path.join(HOME, "wxforge_training", "train_swin")
 
 def find_wxforge():
-    for c in [shutil.which("wxforge"), "/root/wxforge/target/release/wxforge",
-              str(Path(__file__).resolve().parents[2] / "target/release/wxforge.exe"),
-              str(Path(__file__).resolve().parents[2] / "target/release/wxforge")]:
-        if c and Path(c).is_file(): return c
+    for c in [shutil.which("wxforge"),
+              os.path.join(HOME, "wxforge", "target", "release", "wxforge.exe"),
+              os.path.join(HOME, "wxforge", "target", "release", "wxforge")]:
+        if c and os.path.isfile(c):
+            return c
     sys.exit("ERROR: wxforge binary not found.")
 
-def run(cmd, **kw):
-    print(f"  > {' '.join(cmd[:6])}{'...' if len(cmd)>6 else ''}")
-    return subprocess.run(cmd, capture_output=True, text=True, **kw)
+WXF = find_wxforge()
 
-def fetch_and_build(wxf):
-    result = {}
-    for fhr in FHRS:
-        d = WORK_DIR / f"fhr_{fhr:03d}"
-        if d.exists() and (d / "sample_manifest.json").exists():
-            result[fhr] = d; continue
-        parts = []
-        for field in FIELDS:
-            out = WORK_DIR / f"tmp_{field.split(':')[0]}_{fhr:03d}.grib2"
-            if not out.exists():
-                r = run([wxf, "fetch", "model-subset", "--model", "hrrr",
-                         "--product", "surface", "--forecast-hour", str(fhr),
-                         "--search", field, "--output", str(out)], check=False)
-                if r.returncode != 0: break
-            parts.append(out)
-        if len(parts) < len(FIELDS): continue
-        merged = WORK_DIR / f"hrrr_f{fhr:03d}.grib2"
-        with open(merged, "wb") as f:
-            for p in parts: f.write(p.read_bytes())
-        d.mkdir(parents=True, exist_ok=True)
-        r = run([wxf, "train", "build-grib-sample", "--file", str(merged),
-                 "--output-dir", str(d)], check=False)
-        if r.returncode == 0: result[fhr] = d
-    return result
+def fetch_data(n_hours):
+    grib_dir = os.path.join(WORK, "gribs")
+    os.makedirs(grib_dir, exist_ok=True)
+    existing = glob.glob(os.path.join(grib_dir, "hrrr_f*.grib2"))
+    if len(existing) >= n_hours:
+        print(f"  Using {len(existing)} cached GRIBs")
+        return grib_dir
+    print(f"  Downloading {n_hours} HRRR forecast hours...")
+    subprocess.run([WXF, "fetch", "batch",
+        "--model", "hrrr", "--product", "surface",
+        "--forecast-hours", f"0-{n_hours-1}",
+        "--output-dir", grib_dir, "--parallelism", "4"],
+        capture_output=True, timeout=3600)
+    return grib_dir
 
-def load_sample(d, crop):
-    m = json.loads((d / "sample_manifest.json").read_text())
-    ch = {c["name"]: d / c["data_file"] for c in m["channels"]}
-    if not all(k in ch for k in FKEYS): return None
-    arrs = [np.load(str(ch[k])).astype(np.float32) for k in FKEYS]
-    h, w = arrs[0].shape; ch_, cw = min(h,crop), min(w,crop)
-    y0, x0 = (h-ch_)//2, (w-cw)//2
-    return np.stack([a[y0:y0+ch_, x0:x0+cw] for a in arrs])
+def decode_grib(grib_path):
+    name = os.path.basename(grib_path).replace(".grib2", "")
+    out_dir = os.path.join(WORK, "decoded", name)
+    if not os.path.isdir(out_dir):
+        subprocess.run([WXF, "train", "build-grib-sample", "--file", grib_path,
+                        "--output-dir", out_dir, "--colormap", "heat"],
+                       capture_output=True, timeout=60)
+    return out_dir
 
-class ForecastDataset(Dataset):
-    def __init__(self, fhr_map, crop=CROP, lead=6):
-        self.pairs = []
-        for fhr in sorted(fhr_map):
-            if fhr+lead not in fhr_map: continue
-            inp, tgt = load_sample(fhr_map[fhr], crop), load_sample(fhr_map[fhr+lead], crop)
-            if inp is None or tgt is None: continue
-            for c in range(inp.shape[0]):
-                mu, s = inp[c].mean(), inp[c].std()+1e-8
-                inp[c] = (inp[c]-mu)/s; tgt[c] = (tgt[c]-mu)/s
-            self.pairs.append((torch.from_numpy(inp), torch.from_numpy(tgt)))
-    def __len__(self): return len(self.pairs)
-    def __getitem__(self, i): return self.pairs[i]
+def find_field(decoded_dir, pattern):
+    matches = glob.glob(os.path.join(decoded_dir, f"*{pattern}*.npy"))
+    if matches:
+        return np.load(matches[0]).astype(np.float32)
+    return None
 
-# -- Swin Architecture -----------------------------------------------------
+# -- Swin Architecture (from train_all_quick.py) --
 class PatchEmbed(nn.Module):
-    def __init__(self, ic, dim, ps):
-        super().__init__(); self.proj=nn.Conv2d(ic,dim,ps,stride=ps); self.norm=nn.LayerNorm(dim)
-    def forward(self, x):
-        x=self.proj(x); B,C,H,W=x.shape
-        return self.norm(x.flatten(2).transpose(1,2)), H, W
-
-class WinAttn(nn.Module):
-    def __init__(self, dim, nh, ws):
+    def __init__(self, ps=8, inc=2, dim=128):
         super().__init__()
-        self.nh, self.ws, self.scale = nh, ws, (dim//nh)**-0.5
-        self.qkv=nn.Linear(dim, dim*3); self.proj=nn.Linear(dim,dim)
-    def forward(self, x, H, W):
-        B,N,C = x.shape; ws=self.ws
-        x = x.view(B,H,W,C)
-        pH, pW = (ws-H%ws)%ws, (ws-W%ws)%ws
-        x = F.pad(x, (0,0,0,pW,0,pH)); Hp,Wp = H+pH, W+pW
-        x = x.view(B,Hp//ws,ws,Wp//ws,ws,C).permute(0,1,3,2,4,5).reshape(-1,ws*ws,C)
-        qkv = self.qkv(x).reshape(-1,ws*ws,3,self.nh,C//self.nh).permute(2,0,3,1,4)
-        q,k,v = qkv[0],qkv[1],qkv[2]
-        attn = (q@k.transpose(-2,-1))*self.scale
-        x = (attn.softmax(-1)@v).transpose(1,2).reshape(-1,ws*ws,C)
-        x = self.proj(x).view(B,Hp//ws,Wp//ws,ws,ws,C).permute(0,1,3,2,4,5).reshape(B,Hp,Wp,C)
-        return x[:,:H,:W,:].reshape(B,N,C)
+        self.proj = nn.Conv2d(inc, dim, ps, ps)
+    def forward(self, x):
+        return self.proj(x).flatten(2).transpose(1, 2)
 
 class SwinBlock(nn.Module):
-    def __init__(self, dim, nh, ws):
+    def __init__(self, dim=128, heads=4):
         super().__init__()
-        self.n1=nn.LayerNorm(dim); self.attn=WinAttn(dim,nh,ws)
-        self.n2=nn.LayerNorm(dim)
-        self.ffn=nn.Sequential(nn.Linear(dim,dim*4), nn.GELU(), nn.Linear(dim*4,dim))
-    def forward(self, x, H, W):
-        x = x + self.attn(self.n1(x), H, W); return x + self.ffn(self.n2(x))
-
-class SwinForecaster(nn.Module):
-    def __init__(self, ic=NCH, oc=NCH, ps=PATCH, dim=EDIM, nh=NHEAD, nb=NBLK, ws=WIN):
-        super().__init__()
-        self.ps=ps; self.oc=oc; self.embed=PatchEmbed(ic,dim,ps)
-        self.blocks=nn.ModuleList([SwinBlock(dim,nh,ws) for _ in range(nb)])
-        self.norm=nn.LayerNorm(dim); self.head=nn.Linear(dim, oc*ps*ps)
+        self.norm1 = nn.LayerNorm(dim)
+        self.attn = nn.MultiheadAttention(dim, heads, batch_first=True)
+        self.norm2 = nn.LayerNorm(dim)
+        self.ffn = nn.Sequential(nn.Linear(dim, dim*4), nn.GELU(), nn.Linear(dim*4, dim))
     def forward(self, x):
-        B,_,Hi,Wi = x.shape; tok,H,W = self.embed(x)
-        for blk in self.blocks: tok=blk(tok,H,W)
-        out = self.head(self.norm(tok)).view(B,H,W,self.oc,self.ps,self.ps)
-        out = out.permute(0,3,1,4,2,5).reshape(B,self.oc,H*self.ps,W*self.ps)
-        return out[:,:,:Hi,:Wi]
+        x = x + self.attn(self.norm1(x), self.norm1(x), self.norm1(x))[0]
+        return x + self.ffn(self.norm2(x))
+
+class SwinForecast(nn.Module):
+    def __init__(self, inc=2, outc=2, ps=8, dim=128):
+        super().__init__()
+        self.ps = ps
+        self.embed = PatchEmbed(ps, inc, dim)
+        self.blocks = nn.Sequential(SwinBlock(dim), SwinBlock(dim))
+        self.head = nn.Linear(dim, outc * ps * ps)
+        self.outc = outc
+    def forward(self, x):
+        B, _, H, W = x.shape
+        tokens = self.blocks(self.embed(x))
+        out = self.head(tokens)
+        pH, pW = H // self.ps, W // self.ps
+        return out.transpose(1, 2).reshape(B, self.outc, pH, self.ps, pW, self.ps).permute(0,1,2,4,3,5).reshape(B, self.outc, H, W)
 
 def main():
-    print("="*60+"\nSwin Transformer 6h Forecasting\n"+"="*60)
-    wxf = find_wxforge()
-    print(f"wxforge: {wxf}\nDevice:  {DEVICE}\n")
+    parser = argparse.ArgumentParser(description="Swin transformer 3h forecast")
+    parser.add_argument("--hours", type=int, default=24)
+    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--crop", type=int, default=256)
+    args = parser.parse_args()
+    CS = args.crop
+    LEAD = 3
+    NC = 2  # channels: TMP + CAPE
 
-    print("[1/4] Fetching HRRR surface data (fhr 0-18)...")
-    WORK_DIR.mkdir(parents=True, exist_ok=True)
-    fhr_map = fetch_and_build(wxf)
-    print(f"  Got {len(fhr_map)} forecast hours.\n")
+    print("=" * 60)
+    print("Swin Transformer 3h Forecasting")
+    print("=" * 60)
+    print(f"Device: {DEVICE}")
+    os.makedirs(os.path.join(WORK, "decoded"), exist_ok=True)
 
-    print("[2/4] Building forecast-pair dataset (T -> T+6h)...")
-    ds = ForecastDataset(fhr_map)
-    print(f"  Valid pairs: {len(ds)}")
-    if len(ds) < 2: sys.exit("ERROR: Need >=2 pairs.")
-    nt = max(1, len(ds)//5)
-    train_pairs, test_pairs = ds.pairs[:-nt], ds.pairs[-nt:]
-    tr = ForecastDataset.__new__(ForecastDataset); tr.pairs = train_pairs
-    te = ForecastDataset.__new__(ForecastDataset); te.pairs = test_pairs
-    loader = DataLoader(tr, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
-    print(f"  Train: {len(tr)}, Test: {len(te)}\n")
+    # Step 1: Fetch GRIBs
+    print("\n[1/4] Fetching HRRR data...")
+    grib_dir = fetch_data(args.hours)
 
-    print("[3/4] Training Swin Transformer...")
-    model = SwinForecaster().to(DEVICE)
-    print(f"  Parameters: {sum(p.numel() for p in model.parameters()):,}")
-    opt = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-4)
+    # Step 2: Decode all GRIBs and index fields by forecast hour
+    print("\n[2/4] Decoding GRIBs and building forecast pairs...")
+    gribs = sorted(glob.glob(os.path.join(grib_dir, "*.grib2")))
+    print(f"  Found {len(gribs)} GRIB files")
+
+    # Index decoded fields by forecast hour
+    fhr_fields = {}  # fhr -> {pattern: array}
+    for grib in gribs:
+        dec = decode_grib(grib)
+        basename = os.path.basename(grib)
+        # Extract forecast hour from filename (e.g., hrrr_f03.grib2)
+        t = find_field(dec, "TMP_2_m")
+        cape = find_field(dec, "CAPE_surface")
+        if t is not None and cape is not None:
+            fhr_fields[basename] = {"TMP": t, "CAPE": cape}
+            print(f"    {basename}: OK ({t.shape})")
+
+    # Build T -> T+LEAD pairs using sorted keys
+    sorted_keys = sorted(fhr_fields.keys())
+    pairs = []
+    for i in range(len(sorted_keys) - LEAD):
+        k_now = sorted_keys[i]
+        k_fut = sorted_keys[i + LEAD]
+        now_data = fhr_fields[k_now]
+        fut_data = fhr_fields[k_fut]
+        inp = np.stack([now_data["TMP"], now_data["CAPE"]], 0)
+        tgt = np.stack([fut_data["TMP"], fut_data["CAPE"]], 0)
+        pairs.append((inp, tgt))
+
+    print(f"  Pairs: {len(pairs)} (t -> t+{LEAD}h)")
+    if len(pairs) < 1:
+        sys.exit("ERROR: Need at least 1 forecast pair.")
+
+    # Step 3: Train
+    print(f"\n[3/4] Training Swin ({args.epochs} epochs)...")
+    model = SwinForecast(inc=NC, outc=NC, ps=8, dim=128).to(DEVICE)
+    opt = optim.Adam(model.parameters(), lr=5e-4)
     crit = nn.SmoothL1Loss()
-    for ep in range(1, EPOCHS+1):
-        model.train(); tl=0
-        for inp, tgt in loader:
-            loss = crit(model(inp.to(DEVICE)), tgt.to(DEVICE))
-            opt.zero_grad(); loss.backward(); opt.step(); tl += loss.item()
-        print(f"  Epoch {ep}/{EPOCHS}  loss={tl/max(len(loader),1):.6f}")
+    print(f"  Params: {sum(p.numel() for p in model.parameters()):,}")
 
-    print("\n[4/4] Inference on test pair...")
-    model.eval(); inp, tgt = te[0]
-    with torch.no_grad(): pred = model(inp.unsqueeze(0).to(DEVICE)).cpu().squeeze(0)
-    names = ["TMP:2m", "DPT:2m", "UGRD:10m", "VGRD:10m", "CAPE"]
-    print(f"\n  Per-channel RMSE (normalized):")
-    for c, nm in enumerate(names):
-        rmse = torch.sqrt(torch.mean((pred[c]-tgt[c])**2)).item()
-        print(f"    {nm:<10s}: {rmse:.4f}")
-    print(f"    {'Total':<10s}: {torch.sqrt(torch.mean((pred-tgt)**2)).item():.4f}")
-    ckpt = WORK_DIR / "swin_forecaster.pt"
+    for epoch in range(args.epochs):
+        model.train()
+        losses = []
+        for inp, tgt in pairs:
+            h, w = inp.shape[1], inp.shape[2]
+            if h < CS or w < CS:
+                continue
+            for _ in range(4):
+                y, x = np.random.randint(0, h - CS), np.random.randint(0, w - CS)
+                ci = inp[:, y:y+CS, x:x+CS].copy()
+                ct = tgt[:, y:y+CS, x:x+CS].copy()
+                for c in range(NC):
+                    mu = (ci[c].mean() + ct[c].mean()) / 2
+                    std = max(ci[c].std(), ct[c].std(), 1e-8)
+                    ci[c] = (ci[c] - mu) / std
+                    ct[c] = (ct[c] - mu) / std
+                ti = torch.from_numpy(ci[None]).to(DEVICE)
+                tt = torch.from_numpy(ct[None]).to(DEVICE)
+                opt.zero_grad()
+                out = model(ti)
+                loss = crit(out, tt)
+                loss.backward()
+                opt.step()
+                losses.append(loss.item())
+        print(f"  Epoch {epoch+1}/{args.epochs}: loss={np.mean(losses):.6f}")
+
+    # Step 4: Inference
+    print("\n[4/4] Inference on first pair...")
+    model.eval()
+    inp, tgt = pairs[0]
+    h, w = inp.shape[1], inp.shape[2]
+    y0, x0 = min(100, h - CS), min(100, w - CS)
+    ci = inp[:, y0:y0+CS, x0:x0+CS].copy()
+    ct = tgt[:, y0:y0+CS, x0:x0+CS].copy()
+    mus, stds = [], []
+    for c in range(NC):
+        mu = (ci[c].mean() + ct[c].mean()) / 2
+        std = max(ci[c].std(), ct[c].std(), 1e-8)
+        ci[c] = (ci[c] - mu) / std
+        mus.append(mu)
+        stds.append(std)
+    with torch.no_grad():
+        pred = model(torch.from_numpy(ci[None]).to(DEVICE)).cpu().numpy()[0]
+    names = ["TMP:2m", "CAPE"]
+    for c in range(NC):
+        pred[c] = pred[c] * stds[c] + mus[c]
+        ct_un = tgt[c, y0:y0+CS, x0:x0+CS]
+        rmse = np.sqrt(np.mean((pred[c] - ct_un) ** 2))
+        print(f"  {names[c]} RMSE: {rmse:.2f}")
+
+    ckpt = os.path.join(WORK, "swin_forecast.pt")
     torch.save(model.state_dict(), ckpt)
-    print(f"\n  Model saved to {ckpt}\n"+"="*60+"\nDone!")
+    print(f"\n  Saved: {ckpt}")
+    print("=" * 60 + "\nDone!")
 
 if __name__ == "__main__":
     main()

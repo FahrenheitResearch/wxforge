@@ -1,211 +1,205 @@
 """
-Simple Diffusion Model for Weather Downscaling (Super-Resolution)
-==================================================================
-Trains a conditional DDPM to upscale 4x-downsampled weather fields to full
-resolution. UNet backbone with sinusoidal time embedding, 100 linear-beta
-timesteps, noise-prediction objective.
+Diffusion Model for CAPE Super-Resolution (4x)
+================================================
+Trains a conditional DDPM to upscale 4x-downsampled CAPE fields.
+DiffUNet backbone with learned time embedding, 100 linear-beta timesteps,
+noise-prediction objective.
 
-Input: 4x-downsampled TMP:2m, DPT:2m, UGRD:10m, VGRD:10m (bilinear-upscaled
-back to target resolution as conditioning). Target: full-res original fields.
+Uses `wxforge fetch batch` for reliable full-GRIB downloads, then
+`wxforge train build-grib-sample` to decode individual fields to NPY.
 
-Pipeline: wxforge fetches HRRR GRIB2 subsets, decodes to NPY, Python handles
-downsampling/upsampling and diffusion training.
-Usage:  python train_diffusion.py
-Requires: torch, numpy, wxforge binary
+Usage:  python train_diffusion.py [--hours 24] [--epochs 10] [--crop 128]
+Requires: torch, numpy, scipy (for zoom)
 """
-from __future__ import annotations
-import json, math, shutil, subprocess, sys
-from pathlib import Path
+import argparse, glob, os, shutil, subprocess, sys
 import numpy as np
-import torch, torch.nn as nn, torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
+import torch, torch.nn as nn, torch.optim as optim
+from scipy.ndimage import zoom
 
-WORK_DIR = Path(__file__).resolve().parent / "_diffusion_workdir"
-FHRS = list(range(0, 13))
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-EPOCHS, BATCH_SIZE, LR, CROP = 8, 2, 2e-4, 128
-SCALE, NCH, T_STEPS = 4, 4, 100
-BETA_START, BETA_END = 1e-4, 0.02
-FIELDS = ["TMP:2 m above ground", "DPT:2 m above ground",
-          "UGRD:10 m above ground", "VGRD:10 m above ground"]
-FKEYS = ["2t", "2d", "10u", "10v"]
+HOME = os.path.expanduser("~")
+WORK = os.path.join(HOME, "wxforge_training", "train_diffusion")
 
 def find_wxforge():
-    for c in [shutil.which("wxforge"), "/root/wxforge/target/release/wxforge",
-              str(Path(__file__).resolve().parents[2] / "target/release/wxforge.exe"),
-              str(Path(__file__).resolve().parents[2] / "target/release/wxforge")]:
-        if c and Path(c).is_file(): return c
+    for c in [shutil.which("wxforge"),
+              os.path.join(HOME, "wxforge", "target", "release", "wxforge.exe"),
+              os.path.join(HOME, "wxforge", "target", "release", "wxforge")]:
+        if c and os.path.isfile(c):
+            return c
     sys.exit("ERROR: wxforge binary not found.")
 
-def run(cmd, **kw):
-    print(f"  > {' '.join(cmd[:6])}{'...' if len(cmd)>6 else ''}")
-    return subprocess.run(cmd, capture_output=True, text=True, **kw)
+WXF = find_wxforge()
 
-def fetch_and_build(wxf):
-    dirs = []
-    for fhr in FHRS:
-        d = WORK_DIR / f"fhr_{fhr:03d}"
-        if d.exists() and (d / "sample_manifest.json").exists():
-            dirs.append(d); continue
-        parts = []
-        for field in FIELDS:
-            out = WORK_DIR / f"tmp_{field.split(':')[0]}_{fhr:03d}.grib2"
-            if not out.exists():
-                r = run([wxf, "fetch", "model-subset", "--model", "hrrr",
-                         "--product", "surface", "--forecast-hour", str(fhr),
-                         "--search", field, "--output", str(out)], check=False)
-                if r.returncode != 0: break
-            parts.append(out)
-        if len(parts) < len(FIELDS): continue
-        merged = WORK_DIR / f"hrrr_f{fhr:03d}.grib2"
-        with open(merged, "wb") as f:
-            for p in parts: f.write(p.read_bytes())
-        d.mkdir(parents=True, exist_ok=True)
-        r = run([wxf, "train", "build-grib-sample", "--file", str(merged),
-                 "--output-dir", str(d)], check=False)
-        if r.returncode == 0: dirs.append(d)
-    return dirs
+def fetch_data(n_hours):
+    grib_dir = os.path.join(WORK, "gribs")
+    os.makedirs(grib_dir, exist_ok=True)
+    existing = glob.glob(os.path.join(grib_dir, "hrrr_f*.grib2"))
+    if len(existing) >= n_hours:
+        print(f"  Using {len(existing)} cached GRIBs")
+        return grib_dir
+    print(f"  Downloading {n_hours} HRRR forecast hours...")
+    subprocess.run([WXF, "fetch", "batch",
+        "--model", "hrrr", "--product", "surface",
+        "--forecast-hours", f"0-{n_hours-1}",
+        "--output-dir", grib_dir, "--parallelism", "4"],
+        capture_output=True, timeout=3600)
+    return grib_dir
 
-class DownscaleDataset(Dataset):
-    def __init__(self, sample_dirs, crop=CROP, scale=SCALE):
-        self.samples, self.scale = [], scale
-        for d in sample_dirs:
-            m = json.loads((d / "sample_manifest.json").read_text())
-            ch = {c["name"]: d / c["data_file"] for c in m["channels"]}
-            if not all(k in ch for k in FKEYS): continue
-            arrs = [np.load(str(ch[k])).astype(np.float32) for k in FKEYS]
-            h, w = arrs[0].shape
-            ch_, cw = (min(h,crop)//scale)*scale, (min(w,crop)//scale)*scale
-            y0, x0 = (h-ch_)//2, (w-cw)//2
-            hi = np.stack([a[y0:y0+ch_, x0:x0+cw] for a in arrs])
-            for c in range(hi.shape[0]):
-                mu, s = hi[c].mean(), hi[c].std()+1e-8; hi[c] = (hi[c]-mu)/s
-            self.samples.append(torch.from_numpy(hi))
-    def __len__(self): return len(self.samples)
-    def __getitem__(self, i):
-        hi = self.samples[i]
-        lo = F.avg_pool2d(hi.unsqueeze(0), self.scale).squeeze(0)
-        lo_up = F.interpolate(lo.unsqueeze(0), scale_factor=self.scale,
-                              mode="bilinear", align_corners=False).squeeze(0)
-        return lo_up, hi  # condition, target
+def decode_grib(grib_path):
+    name = os.path.basename(grib_path).replace(".grib2", "")
+    out_dir = os.path.join(WORK, "decoded", name)
+    if not os.path.isdir(out_dir):
+        subprocess.run([WXF, "train", "build-grib-sample", "--file", grib_path,
+                        "--output-dir", out_dir, "--colormap", "heat"],
+                       capture_output=True, timeout=60)
+    return out_dir
 
-# -- Diffusion schedule ----------------------------------------------------
-class DiffSchedule:
-    def __init__(self, T=T_STEPS):
-        self.T = T
-        betas = torch.linspace(BETA_START, BETA_END, T)
-        alphas = 1.0 - betas; abar = torch.cumprod(alphas, 0)
-        self.betas = betas
-        self.sqrt_abar = torch.sqrt(abar)
-        self.sqrt_1m_abar = torch.sqrt(1-abar)
-        self.sqrt_recip_a = torch.sqrt(1/alphas)
-        self.coef = betas / self.sqrt_1m_abar
-    def q_sample(self, x0, t, noise=None):
-        if noise is None: noise = torch.randn_like(x0)
-        sa = self.sqrt_abar[t].view(-1,1,1,1).to(x0.device)
-        sb = self.sqrt_1m_abar[t].view(-1,1,1,1).to(x0.device)
-        return sa*x0 + sb*noise, noise
-    def p_sample(self, model, xt, t_idx, cond):
-        t = torch.full((xt.shape[0],), t_idx, device=xt.device, dtype=torch.long)
-        eps = model(xt, t, cond)
-        mean = self.sqrt_recip_a[t_idx].to(xt.device) * (xt - self.coef[t_idx].to(xt.device)*eps)
-        if t_idx > 0:
-            return mean + torch.sqrt(self.betas[t_idx]).to(xt.device) * torch.randn_like(xt)
-        return mean
+def find_field(decoded_dir, pattern):
+    matches = glob.glob(os.path.join(decoded_dir, f"*{pattern}*.npy"))
+    if matches:
+        return np.load(matches[0]).astype(np.float32)
+    return None
 
-# -- UNet with time embedding -----------------------------------------------
-class SinEmb(nn.Module):
-    def __init__(self, d): super().__init__(); self.d = d
-    def forward(self, t):
-        h = self.d//2; e = math.log(10000)/(h-1)
-        e = torch.exp(torch.arange(h, device=t.device, dtype=torch.float32)*-e)
-        e = t.float().unsqueeze(1)*e.unsqueeze(0)
-        return torch.cat([e.sin(), e.cos()], 1)
-
-class CBlock(nn.Module):
-    def __init__(self, ic, oc, td):
+# -- Diffusion UNet Architecture (from train_all_quick.py) --
+class TimeEmbed(nn.Module):
+    def __init__(self, dim):
         super().__init__()
-        self.c1=nn.Conv2d(ic,oc,3,padding=1); self.c2=nn.Conv2d(oc,oc,3,padding=1)
-        self.b1=nn.BatchNorm2d(oc); self.b2=nn.BatchNorm2d(oc); self.tm=nn.Linear(td,oc)
-    def forward(self, x, te):
-        h = F.relu(self.b1(self.c1(x)))
-        h = h + self.tm(te).unsqueeze(-1).unsqueeze(-1)
-        return F.relu(self.b2(self.c2(h)))
+        self.net = nn.Sequential(nn.Linear(1, dim), nn.SiLU(), nn.Linear(dim, dim))
+    def forward(self, t):
+        return self.net(t.view(-1, 1).float())
 
 class DiffUNet(nn.Module):
-    def __init__(self, ic=NCH, cc=NCH, b=32):
+    def __init__(self, inc=2, dim=64):
         super().__init__()
-        td = b*4
-        self.temb = nn.Sequential(SinEmb(b), nn.Linear(b,td), nn.GELU(), nn.Linear(td,td))
-        self.enc1=CBlock(ic+cc, b, td); self.enc2=CBlock(b, b*2, td)
-        self.bot=CBlock(b*2, b*4, td)
-        self.up2=nn.ConvTranspose2d(b*4,b*2,2,stride=2); self.dec2=CBlock(b*4,b*2,td)
-        self.up1=nn.ConvTranspose2d(b*2,b,2,stride=2); self.dec1=CBlock(b*2,b,td)
-        self.head=nn.Conv2d(b, ic, 1); self.pool=nn.MaxPool2d(2)
-    def forward(self, xn, t, cond):
-        te = self.temb(t); x = torch.cat([xn, cond], 1)
-        e1 = self.enc1(x, te); e2 = self.enc2(self.pool(e1), te)
-        b = self.bot(self.pool(e2), te)
-        d2 = self.dec2(torch.cat([self.up2(b), e2], 1), te)
-        d1 = self.dec1(torch.cat([self.up1(d2), e1], 1), te)
-        return self.head(d1)
+        self.te = TimeEmbed(dim)
+        self.enc = nn.Sequential(nn.Conv2d(inc,dim,3,1,1),nn.SiLU(),nn.Conv2d(dim,dim,3,1,1),nn.SiLU())
+        self.mid = nn.Sequential(nn.Conv2d(dim,dim*2,3,2,1),nn.SiLU(),nn.Conv2d(dim*2,dim*2,3,1,1),nn.SiLU())
+        self.dec = nn.Sequential(nn.ConvTranspose2d(dim*2,dim,2,2),nn.SiLU(),nn.Conv2d(dim,dim,3,1,1),nn.SiLU())
+        self.out = nn.Conv2d(dim*2, 1, 1)
+        self.te_proj = nn.Linear(dim, dim)
+    def forward(self, x, t):
+        te = self.te_proj(self.te(t))  # (B, dim)
+        e = self.enc(x)
+        e = e + te[:, :, None, None].expand_as(e)
+        m = self.mid(e)
+        d = self.dec(m)
+        return self.out(torch.cat([e, d], 1))
 
 def main():
-    print("="*60+"\nDiffusion Model for Weather Downscaling\n"+"="*60)
-    wxf = find_wxforge()
-    print(f"wxforge: {wxf}\nDevice:  {DEVICE}\n")
+    parser = argparse.ArgumentParser(description="Diffusion CAPE super-resolution")
+    parser.add_argument("--hours", type=int, default=24)
+    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--crop", type=int, default=128)
+    args = parser.parse_args()
+    CS = args.crop
+    T_STEPS = 100
 
-    print("[1/4] Fetching HRRR surface data...")
-    WORK_DIR.mkdir(parents=True, exist_ok=True)
-    dirs = fetch_and_build(wxf)
-    print(f"  Got {len(dirs)} samples.\n")
+    print("=" * 60)
+    print("Diffusion Model — 4x CAPE Super-Resolution")
+    print("=" * 60)
+    print(f"Device: {DEVICE}")
+    os.makedirs(os.path.join(WORK, "decoded"), exist_ok=True)
 
-    print("[2/4] Building downscaling dataset...")
-    ds = DownscaleDataset(dirs)
-    print(f"  Valid samples: {len(ds)}")
-    if len(ds) < 2: sys.exit("ERROR: Need >=2 samples.")
-    nt = max(1, len(ds)//4)
-    tr = DownscaleDataset.__new__(DownscaleDataset); tr.samples=ds.samples[:-nt]; tr.scale=SCALE
-    te = DownscaleDataset.__new__(DownscaleDataset); te.samples=ds.samples[-nt:]; te.scale=SCALE
-    loader = DataLoader(tr, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
-    print(f"  Train: {len(tr)}, Test: {len(te)}\n")
+    # Step 1: Fetch GRIBs
+    print("\n[1/4] Fetching HRRR data...")
+    grib_dir = fetch_data(args.hours)
 
-    print("[3/4] Training diffusion model...")
-    sched = DiffSchedule()
-    model = DiffUNet().to(DEVICE)
-    print(f"  Parameters: {sum(p.numel() for p in model.parameters()):,}")
+    # Step 2: Decode and collect CAPE fields
+    print("\n[2/4] Decoding GRIBs and collecting CAPE fields...")
+    gribs = sorted(glob.glob(os.path.join(grib_dir, "*.grib2")))
+    print(f"  Found {len(gribs)} GRIB files")
+
+    samples = []
+    for grib in gribs:
+        dec = decode_grib(grib)
+        cape = find_field(dec, "CAPE_surface")
+        if cape is not None:
+            samples.append(cape)
+            print(f"    {os.path.basename(grib)}: OK ({cape.shape})")
+
+    print(f"  CAPE samples: {len(samples)}")
+    if len(samples) < 2:
+        sys.exit("ERROR: Need at least 2 CAPE samples.")
+
+    # Diffusion schedule
+    betas = np.linspace(1e-4, 0.02, T_STEPS).astype(np.float32)
+    alphas = 1 - betas
+    alpha_bar = np.cumprod(alphas)
+
+    # Step 3: Train
+    print(f"\n[3/4] Training DiffUNet ({args.epochs} epochs)...")
+    model = DiffUNet(inc=2, dim=64).to(DEVICE)
+    opt = optim.Adam(model.parameters(), lr=1e-3)
+    print(f"  Params: {sum(p.numel() for p in model.parameters()):,}")
     print(f"  Diffusion timesteps: {T_STEPS}")
-    opt = torch.optim.Adam(model.parameters(), lr=LR)
-    for ep in range(1, EPOCHS+1):
-        model.train(); tl=0
-        for cond, tgt in loader:
-            cond, tgt = cond.to(DEVICE), tgt.to(DEVICE)
-            t = torch.randint(0, sched.T, (cond.shape[0],), device=DEVICE)
-            noisy, noise = sched.q_sample(tgt, t)
-            loss = F.mse_loss(model(noisy, t, cond), noise)
-            opt.zero_grad(); loss.backward(); opt.step(); tl += loss.item()
-        print(f"  Epoch {ep}/{EPOCHS}  noise_MSE={tl/max(len(loader),1):.6f}")
 
-    print("\n[4/4] Generating high-res sample via reverse diffusion...")
-    model.eval(); cond, truth = te[0]
-    cb = cond.unsqueeze(0).to(DEVICE)
+    for epoch in range(args.epochs):
+        model.train()
+        losses = []
+        for cape in samples:
+            h, w = cape.shape
+            if h < CS or w < CS:
+                continue
+            for _ in range(4):
+                y, x = np.random.randint(0, h - CS), np.random.randint(0, w - CS)
+                hr = cape[y:y+CS, x:x+CS].copy()
+                hr = np.log1p(hr)
+                mu, std = hr.mean(), hr.std() + 1e-8
+                hr = (hr - mu) / std
+                # Low-res condition (4x downsample then upsample)
+                lr = zoom(zoom(hr, 0.25, order=1), 4.0, order=1)
+                # Add noise
+                t = np.random.randint(0, T_STEPS)
+                ab = alpha_bar[t]
+                noise = np.random.randn(*hr.shape).astype(np.float32)
+                noisy = np.sqrt(ab) * hr + np.sqrt(1 - ab) * noise
+                # Stack: noisy + condition
+                inp = np.stack([noisy, lr], 0)
+                ti = torch.from_numpy(inp[None]).to(DEVICE)
+                tt = torch.tensor([t / T_STEPS]).float().to(DEVICE)
+                tn = torch.from_numpy(noise[None, None]).to(DEVICE)
+                opt.zero_grad()
+                pred = model(ti, tt)
+                loss = nn.MSELoss()(pred, tn)
+                loss.backward()
+                opt.step()
+                losses.append(loss.item())
+        print(f"  Epoch {epoch+1}/{args.epochs}: loss={np.mean(losses):.6f}")
+
+    # Step 4: Inference — reverse diffusion
+    print("\n[4/4] Reverse diffusion sampling...")
+    model.eval()
+    cape = samples[0]
+    h, w = cape.shape
+    y0, x0 = min(100, h - CS), min(100, w - CS)
+    hr = cape[y0:y0+CS, x0:x0+CS].copy()
+    hr_norm = (np.log1p(hr) - np.log1p(hr).mean()) / (np.log1p(hr).std() + 1e-8)
+    lr = zoom(zoom(hr_norm, 0.25, order=1), 4.0, order=1)
+
+    x_t = torch.randn(1, 1, CS, CS).to(DEVICE)
+    lr_t = torch.from_numpy(lr[None, None]).to(DEVICE)
     with torch.no_grad():
-        xt = torch.randn(1, NCH, cond.shape[1], cond.shape[2], device=DEVICE)
-        for t in reversed(range(sched.T)): xt = sched.p_sample(model, xt, t, cb)
-    gen = xt.cpu().squeeze(0)
-    bl_rmse = torch.sqrt(torch.mean((cond-truth)**2)).item()
-    df_rmse = torch.sqrt(torch.mean((gen-truth)**2)).item()
-    print(f"\n  Bilinear baseline RMSE: {bl_rmse:.4f}")
-    print(f"  Diffusion output RMSE:  {df_rmse:.4f}")
-    print(f"  Improvement: {(1-df_rmse/bl_rmse)*100:+.1f}%")
-    names = ["TMP:2m", "DPT:2m", "UGRD:10m", "VGRD:10m"]
-    for c, nm in enumerate(names):
-        b = torch.sqrt(torch.mean((cond[c]-truth[c])**2)).item()
-        d = torch.sqrt(torch.mean((gen[c]-truth[c])**2)).item()
-        print(f"    {nm:<10s}: baseline={b:.4f}  diffusion={d:.4f}")
-    ckpt = WORK_DIR / "diffusion_downscaler.pt"
+        for t in reversed(range(T_STEPS)):
+            tt = torch.tensor([t / T_STEPS]).float().to(DEVICE)
+            inp = torch.cat([x_t, lr_t], 1)
+            pred_noise = model(inp, tt)
+            ab = alpha_bar[t]
+            x_t = (x_t - (1 - alphas[t]) / np.sqrt(1 - ab) * pred_noise) / np.sqrt(alphas[t])
+            if t > 0:
+                x_t += np.sqrt(betas[t]) * torch.randn_like(x_t)
+
+    sr = x_t.cpu().numpy()[0, 0]
+    baseline = lr
+    sr_rmse = np.sqrt(np.mean((sr - hr_norm) ** 2))
+    bl_rmse = np.sqrt(np.mean((baseline - hr_norm) ** 2))
+    print(f"  Diffusion RMSE: {sr_rmse:.4f}")
+    print(f"  Bilinear RMSE:  {bl_rmse:.4f}")
+    print(f"  Improvement: {(1 - sr_rmse / bl_rmse) * 100:.1f}%")
+
+    ckpt = os.path.join(WORK, "diffusion_sr.pt")
     torch.save(model.state_dict(), ckpt)
-    print(f"\n  Model saved to {ckpt}\n"+"="*60+"\nDone!")
+    print(f"\n  Saved: {ckpt}")
+    print("=" * 60 + "\nDone!")
 
 if __name__ == "__main__":
     main()

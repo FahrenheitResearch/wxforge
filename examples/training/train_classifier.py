@@ -1,148 +1,150 @@
 """
 Binary Severe Weather Classifier (MLP)
 =======================================
-Trains a 3-hidden-layer MLP to classify whether a forecast hour contains
-"severe" convective potential (CAPE > 1000 J/kg anywhere in the domain).
+Extracts scalar features from decoded HRRR GRIBs and trains a 3-layer MLP
+to classify severe convective potential (CAPE > 1000 J/kg).
 
-Features extracted from HRRR GRIB2: max/mean CAPE, max/mean SRH,
-max wind speed, mean T2m, mean Td2m, mean T-Td spread (8 scalars).
+Features: max CAPE, mean CAPE, max wind speed, mean T, mean Td, T-Td spread.
 
-Pipeline: wxforge fetches HRRR subsets, decodes to NPY, Python extracts
-scalar features, MLP trains on tabular data.
-Usage:  python train_classifier.py
-Requires: torch, numpy, wxforge binary
+Uses `wxforge fetch batch` for reliable full-GRIB downloads, then
+`wxforge train build-grib-sample` to decode individual fields to NPY.
+
+Usage:  python train_classifier.py [--hours 24] [--epochs 10]
 """
-from __future__ import annotations
-import json, shutil, subprocess, sys
-from pathlib import Path
+import argparse, glob, os, shutil, subprocess, sys
 import numpy as np
-import torch, torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
+import torch, torch.nn as nn, torch.optim as optim
 
-WORK_DIR = Path(__file__).resolve().parent / "_classifier_workdir"
-FHRS = list(range(0, 19))
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-EPOCHS, BATCH_SIZE, LR = 30, 4, 1e-3
-SEVERE_THRESHOLD = 1000.0
-FIELDS = ["TMP:2 m above ground", "DPT:2 m above ground", "UGRD:10 m above ground",
-          "VGRD:10 m above ground", "CAPE:surface", "HLCY:3000-0 m above ground"]
-KEYS = ["2t", "2d", "10u", "10v", "cape", "hlcy"]
+HOME = os.path.expanduser("~")
+WORK = os.path.join(HOME, "wxforge_training", "train_classifier")
 
 def find_wxforge():
-    for c in [shutil.which("wxforge"), "/root/wxforge/target/release/wxforge",
-              str(Path(__file__).resolve().parents[2] / "target/release/wxforge.exe"),
-              str(Path(__file__).resolve().parents[2] / "target/release/wxforge")]:
-        if c and Path(c).is_file(): return c
+    for c in [shutil.which("wxforge"),
+              os.path.join(HOME, "wxforge", "target", "release", "wxforge.exe"),
+              os.path.join(HOME, "wxforge", "target", "release", "wxforge")]:
+        if c and os.path.isfile(c):
+            return c
     sys.exit("ERROR: wxforge binary not found.")
 
-def run(cmd, **kw):
-    print(f"  > {' '.join(cmd[:6])}{'...' if len(cmd)>6 else ''}")
-    return subprocess.run(cmd, capture_output=True, text=True, **kw)
+WXF = find_wxforge()
 
-def fetch_and_build(wxf):
-    dirs = []
-    for fhr in FHRS:
-        d = WORK_DIR / f"fhr_{fhr:03d}"
-        if d.exists() and (d / "sample_manifest.json").exists():
-            dirs.append(d); continue
-        parts = []
-        for field in FIELDS:
-            out = WORK_DIR / f"tmp_{field.split(':')[0]}_{fhr:03d}.grib2"
-            if not out.exists():
-                r = run([wxf, "fetch", "model-subset", "--model", "hrrr",
-                         "--product", "surface", "--forecast-hour", str(fhr),
-                         "--search", field, "--output", str(out)], check=False)
-                if r.returncode != 0: break
-            parts.append(out)
-        if len(parts) < len(FIELDS): continue
-        merged = WORK_DIR / f"hrrr_f{fhr:03d}.grib2"
-        with open(merged, "wb") as f:
-            for p in parts: f.write(p.read_bytes())
-        d.mkdir(parents=True, exist_ok=True)
-        r = run([wxf, "train", "build-grib-sample", "--file", str(merged),
-                 "--output-dir", str(d)], check=False)
-        if r.returncode == 0: dirs.append(d)
-    return dirs
+def fetch_data(n_hours):
+    grib_dir = os.path.join(WORK, "gribs")
+    os.makedirs(grib_dir, exist_ok=True)
+    existing = glob.glob(os.path.join(grib_dir, "hrrr_f*.grib2"))
+    if len(existing) >= n_hours:
+        print(f"  Using {len(existing)} cached GRIBs")
+        return grib_dir
+    print(f"  Downloading {n_hours} HRRR forecast hours...")
+    subprocess.run([WXF, "fetch", "batch",
+        "--model", "hrrr", "--product", "surface",
+        "--forecast-hours", f"0-{n_hours-1}",
+        "--output-dir", grib_dir, "--parallelism", "4"],
+        capture_output=True, timeout=3600)
+    return grib_dir
 
-def extract_features(d):
-    """Extract 8 scalar features + binary label from a wxforge NPY bundle."""
-    m = json.loads((d / "sample_manifest.json").read_text())
-    ch = {c["name"]: d / c["data_file"] for c in m["channels"]}
-    if not all(k in ch for k in KEYS): return None
-    data = {k: np.load(str(ch[k])).astype(np.float32) for k in KEYS}
-    wspd = np.sqrt(data["10u"]**2 + data["10v"]**2)
-    feats = np.array([data["cape"].max(), data["cape"].mean(), data["hlcy"].max(),
-                      data["hlcy"].mean(), wspd.max(), data["2t"].mean(),
-                      data["2d"].mean(), (data["2t"]-data["2d"]).mean()], dtype=np.float32)
-    label = int(data["cape"].max() > SEVERE_THRESHOLD)
-    return feats, label
+def decode_grib(grib_path):
+    name = os.path.basename(grib_path).replace(".grib2", "")
+    out_dir = os.path.join(WORK, "decoded", name)
+    if not os.path.isdir(out_dir):
+        subprocess.run([WXF, "train", "build-grib-sample", "--file", grib_path,
+                        "--output-dir", out_dir, "--colormap", "heat"],
+                       capture_output=True, timeout=60)
+    return out_dir
 
-class SevereClassifier(nn.Module):
-    def __init__(self, n=8):
+def find_field(decoded_dir, pattern):
+    matches = glob.glob(os.path.join(decoded_dir, f"*{pattern}*.npy"))
+    if matches:
+        return np.load(matches[0]).astype(np.float32)
+    return None
+
+# -- MLP Architecture (from train_all_quick.py) --
+class MLP(nn.Module):
+    def __init__(self, inp=6):
         super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(n,64), nn.ReLU(), nn.Dropout(0.2),
-            nn.Linear(64,32), nn.ReLU(), nn.Dropout(0.2),
-            nn.Linear(32,16), nn.ReLU(), nn.Linear(16,1))
-    def forward(self, x): return self.net(x).squeeze(-1)
+        self.net = nn.Sequential(nn.Linear(inp,64),nn.ReLU(),nn.Linear(64,32),nn.ReLU(),nn.Linear(32,1))
+    def forward(self, x): return self.net(x)
 
 def main():
-    print("="*60+"\nBinary Severe Weather Classifier\n"+"="*60)
-    wxf = find_wxforge()
-    print(f"wxforge: {wxf}\nDevice:  {DEVICE}\n")
+    parser = argparse.ArgumentParser(description="MLP severe weather classifier")
+    parser.add_argument("--hours", type=int, default=24)
+    parser.add_argument("--epochs", type=int, default=10)
+    args = parser.parse_args()
 
-    print("[1/4] Fetching HRRR surface data...")
-    WORK_DIR.mkdir(parents=True, exist_ok=True)
-    dirs = fetch_and_build(wxf)
-    print(f"  Got {len(dirs)} samples.\n")
+    print("=" * 60)
+    print("Binary Severe Weather Classifier")
+    print("=" * 60)
+    print(f"Device: {DEVICE}")
+    os.makedirs(os.path.join(WORK, "decoded"), exist_ok=True)
 
-    print("[2/4] Extracting tabular features...")
-    X_list, y_list = [], []
-    for d in dirs:
-        r = extract_features(d)
-        if r: X_list.append(r[0]); y_list.append(r[1])
-    if len(X_list) < 4: sys.exit(f"ERROR: Only {len(X_list)} valid samples, need >=4.")
-    X = np.stack(X_list); y = np.array(y_list, dtype=np.float32)
-    mu, sig = X.mean(0), X.std(0)+1e-8; X = (X-mu)/sig
-    ns = int(y.sum())
-    print(f"  {len(X)} samples ({ns} severe, {len(X)-ns} non-severe), 8 features\n")
+    # Step 1: Fetch GRIBs
+    print("\n[1/4] Fetching HRRR data...")
+    grib_dir = fetch_data(args.hours)
 
-    split = max(len(X)-3, 1)
-    X_tr, X_te, y_tr, y_te = X[:split], X[split:], y[:split], y[split:]
+    # Step 2: Decode and extract scalar features
+    print("\n[2/4] Decoding GRIBs and extracting features...")
+    gribs = sorted(glob.glob(os.path.join(grib_dir, "*.grib2")))
+    print(f"  Found {len(gribs)} GRIB files")
 
-    print(f"[3/4] Training MLP (train={len(X_tr)}, test={len(X_te)})...")
-    ds = TensorDataset(torch.from_numpy(X_tr), torch.from_numpy(y_tr))
-    loader = DataLoader(ds, batch_size=BATCH_SIZE, shuffle=True)
-    model = SevereClassifier().to(DEVICE)
-    print(f"  Parameters: {sum(p.numel() for p in model.parameters()):,}")
-    opt = torch.optim.Adam(model.parameters(), lr=LR)
+    features, labels = [], []
+    for grib in gribs:
+        dec = decode_grib(grib)
+        cape = find_field(dec, "CAPE_surface")
+        t = find_field(dec, "TMP_2_m")
+        d = find_field(dec, "DPT_2_m")
+        u = find_field(dec, "UGRD_10_m")
+        v = find_field(dec, "VGRD_10_m")
+        if all(x is not None for x in [cape, t, d]):
+            wspd_max = float(np.nanmax(np.sqrt(u**2 + v**2))) if u is not None and v is not None else 0.0
+            feat = [float(np.nanmax(cape)), float(np.nanmean(cape)),
+                    wspd_max,
+                    float(np.nanmean(t)), float(np.nanmean(d)),
+                    float(np.nanmean(t - d))]
+            features.append(feat)
+            labels.append(1.0 if np.nanmax(cape) > 1000 else 0.0)
+            print(f"    {os.path.basename(grib)}: maxCAPE={feat[0]:.0f} -> {'SEVERE' if labels[-1] else 'non-severe'}")
+
+    print(f"  Samples: {len(features)}, Severe: {sum(labels):.0f}, Non-severe: {len(labels)-sum(labels):.0f}")
+    if len(features) < 3:
+        sys.exit(f"ERROR: Only {len(features)} samples, need >= 3.")
+
+    # Step 3: Train
+    print(f"\n[3/4] Training MLP ({args.epochs * 20} iterations)...")
+    X = torch.tensor(features, dtype=torch.float32)
+    Y = torch.tensor(labels, dtype=torch.float32).unsqueeze(1)
+    mu, std = X.mean(0), X.std(0) + 1e-8
+    X = (X - mu) / std
+
+    model = MLP(X.shape[1]).to(DEVICE)
+    opt = optim.Adam(model.parameters(), lr=1e-3)
     crit = nn.BCEWithLogitsLoss()
-    for ep in range(1, EPOCHS+1):
-        model.train(); tl=0; cor=0; tot=0
-        for xb, yb in loader:
-            xb, yb = xb.to(DEVICE), yb.to(DEVICE)
-            loss = crit(model(xb), yb); opt.zero_grad(); loss.backward(); opt.step()
-            tl += loss.item()*len(xb); cor += ((model(xb)>0).long()==yb.long()).sum().item()
-            tot += len(xb)
-        if ep % 5 == 0 or ep == 1:
-            print(f"  Epoch {ep:>3}/{EPOCHS}  loss={tl/max(tot,1):.4f}  acc={cor/max(tot,1)*100:.1f}%")
+    print(f"  Params: {sum(p.numel() for p in model.parameters()):,}")
 
-    print("\n[4/4] Inference on test samples...")
+    total_epochs = args.epochs * 20  # 200 for default
+    for epoch in range(total_epochs):
+        model.train()
+        opt.zero_grad()
+        out = model(X.to(DEVICE))
+        loss = crit(out, Y.to(DEVICE))
+        loss.backward()
+        opt.step()
+        if (epoch + 1) % 50 == 0:
+            acc = ((out > 0).float() == Y.to(DEVICE)).float().mean()
+            print(f"  Epoch {epoch+1}: loss={loss.item():.4f} acc={acc.item():.1%}")
+
+    # Step 4: Inference
+    print("\n[4/4] Per-sample predictions...")
     model.eval()
     with torch.no_grad():
-        logits = model(torch.from_numpy(X_te).float().to(DEVICE))
-        probs = torch.sigmoid(logits).cpu().numpy()
-        preds = (logits > 0).long().cpu().numpy()
-    for i in range(len(X_te)):
-        tl = "SEVERE" if y_te[i]>0.5 else "non-severe"
-        pl = "SEVERE" if preds[i]==1 else "non-severe"
-        print(f"  Sample {i}: prob={probs[i]:.3f}  pred={pl:<12s}  truth={tl:<12s}  "
-              f"[{'OK' if tl==pl else 'MISS'}]")
-    acc = (preds == y_te.astype(int)).mean() * 100
-    print(f"\n  Test accuracy: {acc:.1f}%")
-    ckpt = WORK_DIR / "classifier.pt"
-    torch.save({"model": model.state_dict(), "mu": mu, "sigma": sig}, ckpt)
-    print(f"  Model saved to {ckpt}\n" + "="*60 + "\nDone!")
+        preds = torch.sigmoid(model(X.to(DEVICE))).cpu()
+    for i in range(min(5, len(preds))):
+        print(f"  Sample {i}: pred={preds[i,0]:.3f} true={labels[i]:.0f}")
+
+    ckpt = os.path.join(WORK, "classifier.pt")
+    torch.save({"model": model.state_dict(), "mean": mu, "std": std}, ckpt)
+    print(f"\n  Saved: {ckpt}")
+    print("=" * 60 + "\nDone!")
 
 if __name__ == "__main__":
     main()

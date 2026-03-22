@@ -1,168 +1,176 @@
 """
-UNet for CAPE Prediction from Surface Observations
-====================================================
-Trains a UNet (encoder-decoder with skip connections) to predict CAPE fields
-from surface obs: TMP:2m, DPT:2m, UGRD:10m, VGRD:10m -> CAPE:surface.
+UNet for CAPE Prediction from Surface Fields
+=============================================
+Trains a UNet (3-level encoder/decoder + skip connections) to predict CAPE
+from TMP:2m, DPT:2m, UGRD:10m, VGRD:10m (4ch -> 1ch).
 
-Pipeline: wxforge fetches HRRR GRIB2 subsets, decodes to NPY, PyTorch trains.
-Usage:  python train_unet.py
-Requires: torch, numpy, wxforge binary (in PATH or target/release/)
+Uses `wxforge fetch batch` for reliable full-GRIB downloads, then
+`wxforge train build-grib-sample` to decode individual fields to NPY.
+
+Usage:  python train_unet.py [--hours 24] [--epochs 10] [--crop 256]
 """
-from __future__ import annotations
-import json, shutil, subprocess, sys
-from pathlib import Path
+import argparse, glob, os, shutil, subprocess, sys, time
 import numpy as np
-import torch, torch.nn as nn, torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
+import torch, torch.nn as nn, torch.optim as optim
 
-WORK_DIR = Path(__file__).resolve().parent / "_unet_workdir"
-FHRS = list(range(0, 13))
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-EPOCHS, BATCH_SIZE, LR, CROP = 5, 2, 1e-3, 256
-INPUT_FIELDS = ["TMP:2 m above ground", "DPT:2 m above ground",
-                "UGRD:10 m above ground", "VGRD:10 m above ground"]
-TARGET_FIELD = "CAPE:surface"
-INPUT_KEYS, TARGET_KEY = ["2t", "2d", "10u", "10v"], "cape"
+HOME = os.path.expanduser("~")
+WORK = os.path.join(HOME, "wxforge_training", "train_unet")
 
 def find_wxforge():
-    for c in [shutil.which("wxforge"), "/root/wxforge/target/release/wxforge",
-              str(Path(__file__).resolve().parents[2] / "target/release/wxforge.exe"),
-              str(Path(__file__).resolve().parents[2] / "target/release/wxforge")]:
-        if c and Path(c).is_file(): return c
-    sys.exit("ERROR: wxforge binary not found. Build it or add to PATH.")
+    for c in [shutil.which("wxforge"),
+              os.path.join(HOME, "wxforge", "target", "release", "wxforge.exe"),
+              os.path.join(HOME, "wxforge", "target", "release", "wxforge")]:
+        if c and os.path.isfile(c):
+            return c
+    sys.exit("ERROR: wxforge binary not found.")
 
-def run(cmd, **kw):
-    print(f"  > {' '.join(cmd[:6])}{'...' if len(cmd)>6 else ''}")
-    return subprocess.run(cmd, capture_output=True, text=True, **kw)
+WXF = find_wxforge()
 
-def fetch_and_build(wxf):
-    """Download HRRR subsets and convert to NPY for each forecast hour."""
-    dirs = []
-    for fhr in FHRS:
-        d = WORK_DIR / f"fhr_{fhr:03d}"
-        if d.exists() and (d / "sample_manifest.json").exists():
-            dirs.append(d); continue
-        parts = []
-        for field in INPUT_FIELDS + [TARGET_FIELD]:
-            out = WORK_DIR / f"tmp_{field.split(':')[0]}_{fhr:03d}.grib2"
-            if not out.exists():
-                r = run([wxf, "fetch", "model-subset", "--model", "hrrr",
-                         "--product", "surface", "--forecast-hour", str(fhr),
-                         "--search", field, "--output", str(out)], check=False)
-                if r.returncode != 0: break
-            parts.append(out)
-        if len(parts) < 5: continue
-        merged = WORK_DIR / f"hrrr_f{fhr:03d}.grib2"
-        with open(merged, "wb") as f:
-            for p in parts: f.write(p.read_bytes())
-        d.mkdir(parents=True, exist_ok=True)
-        r = run([wxf, "train", "build-grib-sample", "--file", str(merged),
-                 "--output-dir", str(d)], check=False)
-        if r.returncode == 0: dirs.append(d)
-    return dirs
+def fetch_data(n_hours):
+    grib_dir = os.path.join(WORK, "gribs")
+    os.makedirs(grib_dir, exist_ok=True)
+    existing = glob.glob(os.path.join(grib_dir, "hrrr_f*.grib2"))
+    if len(existing) >= n_hours:
+        print(f"  Using {len(existing)} cached GRIBs")
+        return grib_dir
+    print(f"  Downloading {n_hours} HRRR forecast hours...")
+    subprocess.run([WXF, "fetch", "batch",
+        "--model", "hrrr", "--product", "surface",
+        "--forecast-hours", f"0-{n_hours-1}",
+        "--output-dir", grib_dir, "--parallelism", "4"],
+        capture_output=True, timeout=3600)
+    return grib_dir
 
-# -- Dataset ----------------------------------------------------------------
-class CAPEDataset(Dataset):
-    def __init__(self, sample_dirs, crop=CROP):
-        self.samples = []
-        for d in sample_dirs:
-            m = json.loads((d / "sample_manifest.json").read_text())
-            ch = {c["name"]: d / c["data_file"] for c in m["channels"]}
-            if all(k in ch for k in INPUT_KEYS + [TARGET_KEY]):
-                self.samples.append(([ch[k] for k in INPUT_KEYS], ch[TARGET_KEY]))
-        self.crop = crop
-    def __len__(self): return len(self.samples)
-    def __getitem__(self, idx):
-        inps, tgt_f = self.samples[idx]
-        arrs = [np.load(str(f)).astype(np.float32) for f in inps]
-        tgt = np.load(str(tgt_f)).astype(np.float32)
-        h, w = arrs[0].shape
-        ch, cw = min(h, self.crop), min(w, self.crop)
-        y0, x0 = (h-ch)//2, (w-cw)//2
-        arrs = [a[y0:y0+ch, x0:x0+cw] for a in arrs]
-        tgt = tgt[y0:y0+ch, x0:x0+cw]
-        inp = np.stack(arrs)
-        for c in range(4):
-            mu, s = inp[c].mean(), inp[c].std()+1e-8; inp[c] = (inp[c]-mu)/s
-        tgt = np.log1p(np.clip(tgt, 0, None))  # log-transform CAPE
-        return torch.from_numpy(inp), torch.from_numpy(tgt[None])
+def decode_grib(grib_path):
+    name = os.path.basename(grib_path).replace(".grib2", "")
+    out_dir = os.path.join(WORK, "decoded", name)
+    if not os.path.isdir(out_dir):
+        subprocess.run([WXF, "train", "build-grib-sample", "--file", grib_path,
+                        "--output-dir", out_dir, "--colormap", "heat"],
+                       capture_output=True, timeout=60)
+    return out_dir
 
-# -- UNet Architecture ------------------------------------------------------
+def find_field(decoded_dir, pattern):
+    matches = glob.glob(os.path.join(decoded_dir, f"*{pattern}*.npy"))
+    if matches:
+        return np.load(matches[0]).astype(np.float32)
+    return None
+
+# -- UNet Architecture (from train_all_quick.py) --
 class DoubleConv(nn.Module):
-    def __init__(self, ic, oc):
+    def __init__(self, i, o):
         super().__init__()
-        self.net = nn.Sequential(nn.Conv2d(ic,oc,3,padding=1), nn.BatchNorm2d(oc), nn.ReLU(True),
-                                 nn.Conv2d(oc,oc,3,padding=1), nn.BatchNorm2d(oc), nn.ReLU(True))
+        self.net = nn.Sequential(nn.Conv2d(i,o,3,1,1),nn.BatchNorm2d(o),nn.ReLU(True),
+                                 nn.Conv2d(o,o,3,1,1),nn.BatchNorm2d(o),nn.ReLU(True))
     def forward(self, x): return self.net(x)
 
 class UNet(nn.Module):
-    def __init__(self, ic=4, oc=1, b=32):
+    def __init__(self, inc=4):
         super().__init__()
-        self.enc1, self.enc2, self.enc3 = DoubleConv(ic,b), DoubleConv(b,b*2), DoubleConv(b*2,b*4)
-        self.pool = nn.MaxPool2d(2)
-        self.bot = DoubleConv(b*4, b*8)
-        self.up3 = nn.ConvTranspose2d(b*8,b*4,2,stride=2)
-        self.dec3 = DoubleConv(b*8, b*4)
-        self.up2 = nn.ConvTranspose2d(b*4,b*2,2,stride=2)
-        self.dec2 = DoubleConv(b*4, b*2)
-        self.up1 = nn.ConvTranspose2d(b*2,b,2,stride=2)
-        self.dec1 = DoubleConv(b*2, b)
-        self.head = nn.Conv2d(b, oc, 1)
-    def forward(self, x):
-        _,_,h,w = x.shape
-        x = F.pad(x, (0,(8-w%8)%8,0,(8-h%8)%8))
-        e1=self.enc1(x); e2=self.enc2(self.pool(e1)); e3=self.enc3(self.pool(e2))
-        b=self.bot(self.pool(e3))
-        d3=self.dec3(torch.cat([self.up3(b),e3],1))
-        d2=self.dec2(torch.cat([self.up2(d3),e2],1))
-        d1=self.dec1(torch.cat([self.up1(d2),e1],1))
-        return self.head(d1)[:,:,:h,:w]
+        self.e1,self.e2,self.e3,self.b = DoubleConv(inc,64),DoubleConv(64,128),DoubleConv(128,256),DoubleConv(256,512)
+        self.u3,self.d3 = nn.ConvTranspose2d(512,256,2,2),DoubleConv(512,256)
+        self.u2,self.d2 = nn.ConvTranspose2d(256,128,2,2),DoubleConv(256,128)
+        self.u1,self.d1 = nn.ConvTranspose2d(128,64,2,2),DoubleConv(128,64)
+        self.out,self.pool = nn.Conv2d(64,1,1),nn.MaxPool2d(2)
+    def forward(self,x):
+        e1=self.e1(x);e2=self.e2(self.pool(e1));e3=self.e3(self.pool(e2));b=self.b(self.pool(e3))
+        return self.out(self.d1(torch.cat([self.u1(self.d2(torch.cat([self.u2(self.d3(torch.cat([self.u3(b),e3],1))),e2],1))),e1],1)))
 
-# -- Training & Inference ---------------------------------------------------
 def main():
-    print("="*60+"\nUNet CAPE Prediction\n"+"="*60)
-    wxf = find_wxforge()
-    print(f"wxforge: {wxf}\nDevice:  {DEVICE}\n")
+    parser = argparse.ArgumentParser(description="UNet CAPE prediction")
+    parser.add_argument("--hours", type=int, default=24)
+    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--crop", type=int, default=256)
+    args = parser.parse_args()
+    CS = args.crop
 
-    print("[1/4] Fetching HRRR surface data...")
-    WORK_DIR.mkdir(parents=True, exist_ok=True)
-    dirs = fetch_and_build(wxf)
-    print(f"  Got {len(dirs)} samples.\n")
-    if len(dirs) < 3: sys.exit("ERROR: Need >=3 samples. Check network.")
+    print("=" * 60)
+    print("UNet CAPE Prediction")
+    print("=" * 60)
+    print(f"Device: {DEVICE}")
+    os.makedirs(os.path.join(WORK, "decoded"), exist_ok=True)
 
-    print("[2/4] Building PyTorch dataset...")
-    train_ds, test_ds = CAPEDataset(dirs[:-1]), CAPEDataset(dirs[-1:])
-    print(f"  Train: {len(train_ds)}, Test: {len(test_ds)}\n")
-    if len(train_ds) < 2: sys.exit("ERROR: Not enough valid samples.")
-    loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
+    # Step 1: Fetch GRIBs
+    print("\n[1/4] Fetching HRRR data...")
+    grib_dir = fetch_data(args.hours)
 
-    print("[3/4] Training UNet...")
+    # Step 2: Decode and find fields
+    print("\n[2/4] Decoding GRIBs and building samples...")
+    gribs = sorted(glob.glob(os.path.join(grib_dir, "*.grib2")))
+    print(f"  Found {len(gribs)} GRIB files")
+
+    samples = []
+    for grib in gribs:
+        dec = decode_grib(grib)
+        t = find_field(dec, "TMP_2_m")
+        d = find_field(dec, "DPT_2_m")
+        u = find_field(dec, "UGRD_10_m")
+        v = find_field(dec, "VGRD_10_m")
+        cape = find_field(dec, "CAPE_surface")
+        if all(x is not None for x in [t, d, u, v, cape]):
+            samples.append((np.stack([t, d, u, v], 0), cape))
+            print(f"    {os.path.basename(grib)}: OK ({t.shape})")
+
+    print(f"  Samples: {len(samples)}")
+    if len(samples) < 1:
+        sys.exit("ERROR: No valid samples found.")
+
+    # Step 3: Train
+    print(f"\n[3/4] Training UNet ({args.epochs} epochs)...")
     model = UNet().to(DEVICE)
-    print(f"  Parameters: {sum(p.numel() for p in model.parameters()):,}")
-    opt = torch.optim.Adam(model.parameters(), lr=LR)
+    opt = optim.Adam(model.parameters(), lr=1e-3)
     crit = nn.SmoothL1Loss()
-    for ep in range(1, EPOCHS+1):
-        model.train(); total=0.0
-        for inp, tgt in loader:
-            inp, tgt = inp.to(DEVICE), tgt.to(DEVICE)
-            loss = crit(model(inp), tgt); opt.zero_grad(); loss.backward(); opt.step()
-            total += loss.item()
-        print(f"  Epoch {ep}/{EPOCHS}  loss={total/max(len(loader),1):.4f}")
+    print(f"  Params: {sum(p.numel() for p in model.parameters()):,}")
 
-    print("\n[4/4] Inference on test sample...")
+    for epoch in range(args.epochs):
+        model.train()
+        losses = []
+        for inp, tgt in samples:
+            h, w = inp.shape[1], inp.shape[2]
+            if h < CS or w < CS:
+                continue
+            for _ in range(8):
+                y, x = np.random.randint(0, h - CS), np.random.randint(0, w - CS)
+                crop_in = inp[:, y:y+CS, x:x+CS].copy()
+                crop_tgt = tgt[y:y+CS, x:x+CS].copy()
+                for c in range(4):
+                    mu, std = crop_in[c].mean(), crop_in[c].std() + 1e-8
+                    crop_in[c] = (crop_in[c] - mu) / std
+                crop_tgt = np.log1p(crop_tgt)
+                ti = torch.from_numpy(crop_in[None]).to(DEVICE)
+                tt = torch.from_numpy(crop_tgt[None, None]).to(DEVICE)
+                opt.zero_grad()
+                out = model(ti)
+                loss = crit(out, tt)
+                loss.backward()
+                opt.step()
+                losses.append(loss.item())
+        print(f"  Epoch {epoch+1}/{args.epochs}: loss={np.mean(losses):.6f}")
+
+    # Step 4: Inference
+    print("\n[4/4] Inference on first sample...")
     model.eval()
-    if len(test_ds) > 0:
-        inp, tgt = test_ds[0]
-        with torch.no_grad(): pred = model(inp.unsqueeze(0).to(DEVICE)).cpu().squeeze()
-        pred_cape, tgt_cape = np.expm1(pred.numpy()), np.expm1(tgt.squeeze().numpy())
-        rmse = np.sqrt(np.mean((pred_cape - tgt_cape)**2))
-        print(f"  Pred CAPE: [{pred_cape.min():.0f}, {pred_cape.max():.0f}] J/kg")
-        print(f"  True CAPE: [{tgt_cape.min():.0f}, {tgt_cape.max():.0f}] J/kg")
-        print(f"  RMSE: {rmse:.1f} J/kg")
+    inp, tgt = samples[0]
+    h, w = inp.shape[1], inp.shape[2]
+    y0, x0 = min(100, h - CS), min(100, w - CS)
+    crop_in = inp[:, y0:y0+CS, x0:x0+CS].copy()
+    for c in range(4):
+        mu, std = crop_in[c].mean(), crop_in[c].std() + 1e-8
+        crop_in[c] = (crop_in[c] - mu) / std
+    with torch.no_grad():
+        pred = model(torch.from_numpy(crop_in[None]).to(DEVICE))
+    pred_cape = np.expm1(pred.cpu().numpy()[0, 0])
+    true_cape = tgt[y0:y0+CS, x0:x0+CS]
+    rmse = np.sqrt(np.mean((pred_cape - true_cape) ** 2))
+    print(f"  RMSE: {rmse:.1f} J/kg")
+    print(f"  Pred range: [{pred_cape.min():.0f}, {pred_cape.max():.0f}]")
+    print(f"  True range: [{true_cape.min():.0f}, {true_cape.max():.0f}]")
 
-    ckpt = WORK_DIR / "unet_cape.pt"
+    ckpt = os.path.join(WORK, "unet_cape.pt")
     torch.save(model.state_dict(), ckpt)
-    print(f"\n  Model saved to {ckpt}\n" + "="*60 + "\nDone!")
+    print(f"\n  Saved: {ckpt}")
+    print("=" * 60 + "\nDone!")
 
 if __name__ == "__main__":
     main()
