@@ -1,0 +1,15 @@
+{
+  "dataset_name": "sample-batch-jsonl-dataset",
+  "sample_count": 1,
+  "samples": [
+    {
+      "channel_count": 2,
+      "relative_dir": "sample_main",
+      "sample_id": "sample_main",
+      "shard_index": 0,
+      "source": "examples/sample.grib2",
+      "split": "Train"
+    }
+  ],
+  "shard_index": 0
+}

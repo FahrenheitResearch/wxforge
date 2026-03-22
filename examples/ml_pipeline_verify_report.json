@@ -1,0 +1,192 @@
+{
+  "generated_at_utc": "2026-03-17T19:04:01.240753+00:00",
+  "plans": {
+    "baseline": {
+      "dataset_name": "baseline-weather-dataset",
+      "format": "WebDataset",
+      "channel_count": 3,
+      "label_count": 2,
+      "passed": true
+    },
+    "radar": {
+      "dataset_name": "radar-supervised-weather-dataset",
+      "format": "Parquet",
+      "channel_count": 5,
+      "label_count": 3,
+      "passed": true
+    }
+  },
+  "bundles": {
+    "sample": {
+      "dataset_name": "sample-dataset",
+      "format": "NpyDirectory",
+      "channel_count": 2,
+      "npy_files": [
+        "001_2t_2_m_above_ground.npy",
+        "002_10u_10_m_above_ground.npy"
+      ],
+      "png_files": [
+        "001_2t_2_m_above_ground.png",
+        "002_10u_10_m_above_ground.png"
+      ],
+      "passed": true
+    },
+    "era5": {
+      "dataset_name": "era5_2t_subset-dataset",
+      "format": "NpyDirectory",
+      "channel_count": 1,
+      "npy_files": [
+        "001_2t_surface.npy"
+      ],
+      "png_files": [
+        "001_2t_surface.png"
+      ],
+      "passed": true
+    }
+  },
+  "datasets": {
+    "batch": {
+      "dataset_name": "sample-batch-dataset",
+      "format": "WebDataset",
+      "sample_count": 2,
+      "total_channel_count": 3,
+      "shard_count": 2,
+      "split_counts": {
+        "train": 1,
+        "validation": 0,
+        "test": 1
+      },
+      "sample_dirs": [
+        "era5_surface",
+        "sample_main"
+      ],
+      "shard_files": [
+        "shard-00000.json",
+        "shard-00001.json"
+      ],
+      "tar_shards": [
+        "shard-00000.tar",
+        "shard-00001.tar"
+      ],
+      "jsonl_shards": [],
+      "parquet_shards": [],
+      "passed": true
+    },
+    "batch_jsonl": {
+      "dataset_name": "sample-batch-jsonl-dataset",
+      "format": "Jsonl",
+      "sample_count": 2,
+      "total_channel_count": 3,
+      "shard_count": 2,
+      "split_counts": {
+        "train": 1,
+        "validation": 0,
+        "test": 1
+      },
+      "sample_dirs": [
+        "era5_surface",
+        "sample_main"
+      ],
+      "shard_files": [
+        "shard-00000.json",
+        "shard-00001.json"
+      ],
+      "tar_shards": [],
+      "jsonl_shards": [
+        "shard-00000.jsonl",
+        "shard-00001.jsonl"
+      ],
+      "parquet_shards": [],
+      "passed": true
+    },
+    "batch_parquet": {
+      "dataset_name": "sample-batch-parquet-dataset",
+      "format": "Parquet",
+      "sample_count": 2,
+      "total_channel_count": 3,
+      "shard_count": 2,
+      "split_counts": {
+        "train": 1,
+        "validation": 0,
+        "test": 1
+      },
+      "sample_dirs": [
+        "era5_surface",
+        "sample_main"
+      ],
+      "shard_files": [
+        "shard-00000.json",
+        "shard-00001.json"
+      ],
+      "tar_shards": [],
+      "jsonl_shards": [],
+      "parquet_shards": [
+        "shard-00000.parquet",
+        "shard-00001.parquet"
+      ],
+      "passed": true
+    }
+  },
+  "agent_jobs": {
+    "job_init": {
+      "path": "examples\\ml_pipeline_verify\\agent_job_init.json",
+      "dataset_name": "agent_smoke_dataset",
+      "passed": true
+    },
+    "classical_plan": {
+      "job_name": "classical_severe_job",
+      "dataset_name": "classical_severe_dataset",
+      "channel_count": 23,
+      "label_count": 1,
+      "trainer_family": "xgboost_or_tabular_mlp",
+      "recommended_format": "Parquet",
+      "has_dataset_build_request": true,
+      "has_fetch_plan": false,
+      "warning_count": 0,
+      "passed": true
+    },
+    "swin_plan": {
+      "job_name": "swin_hrrr_job",
+      "dataset_name": "swin_hrrr_dataset",
+      "channel_count": 26,
+      "label_count": 1,
+      "trainer_family": "hierarchical_vision_transformer",
+      "recommended_format": "WebDataset",
+      "has_dataset_build_request": false,
+      "has_fetch_plan": true,
+      "warning_count": 0,
+      "passed": true
+    },
+    "classical_build": {
+      "dataset_name": "classical_severe_dataset",
+      "format": "Parquet",
+      "sample_count": 1,
+      "total_channel_count": 23,
+      "shard_count": 2,
+      "split_counts": {
+        "train": 1,
+        "validation": 0,
+        "test": 0
+      },
+      "sample_dirs": [
+        "synthetic_severe_0001"
+      ],
+      "shard_files": [
+        "shard-00000.json",
+        "shard-00001.json"
+      ],
+      "tar_shards": [],
+      "jsonl_shards": [],
+      "parquet_shards": [
+        "shard-00000.parquet",
+        "shard-00001.parquet"
+      ],
+      "passed": true,
+      "planned_channel_count": 23,
+      "job_plan_exists": true,
+      "model_recipe_exists": true,
+      "dataset_request_exists": true
+    }
+  },
+  "passed": true
+}

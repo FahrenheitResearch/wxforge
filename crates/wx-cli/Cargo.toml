@@ -1,0 +1,25 @@
+[package]
+name = "wx-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Single operator entrypoint for wxforge"
+
+[dependencies]
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+clap = { version = "4", features = ["derive"] }
+parquet = "53"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+wx-calc = { path = "../wx-calc" }
+wx-export = { path = "../wx-export" }
+wx-fetch = { path = "../wx-fetch" }
+wx-grib = { path = "../wx-grib" }
+wx-radar = { path = "../wx-radar" }
+wx-render = { path = "../wx-render" }
+wx-train = { path = "../wx-train" }
+wx-types = { path = "../wx-types" }
+
+[[bin]]
+name = "wxforge"
+path = "src/main.rs"

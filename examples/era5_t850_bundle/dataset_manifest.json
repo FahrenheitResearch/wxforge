@@ -1,0 +1,10 @@
+{
+  "dataset_name": "era5_t850_subset-dataset",
+  "generated_at": "2026-03-16T10:13:20.417909+00:00",
+  "format": "NpyDirectory",
+  "shard_count": 1,
+  "channels": [
+    "t"
+  ],
+  "labels": []
+}

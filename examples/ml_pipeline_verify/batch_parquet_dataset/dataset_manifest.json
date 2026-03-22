@@ -1,0 +1,11 @@
+{
+  "dataset_name": "sample-batch-parquet-dataset",
+  "generated_at": "2026-03-17T19:03:59.321722600+00:00",
+  "format": "Parquet",
+  "shard_count": 2,
+  "channels": [
+    "2t",
+    "10u"
+  ],
+  "labels": []
+}

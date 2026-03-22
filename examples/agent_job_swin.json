@@ -1,0 +1,67 @@
+{
+  "job_name": "swin_hrrr_job",
+  "dataset_name": "swin_hrrr_dataset",
+  "description": "Planner-only Swin job over a multi-cycle HRRR window.",
+  "data_source": {
+    "kind": "model_window",
+    "request": {
+      "model": "hrrr",
+      "product": "surface",
+      "start": "2026-03-10T00:00:00Z",
+      "end": "2026-03-12T18:00:00Z",
+      "forecast_hours": [
+        0,
+        1,
+        2,
+        3,
+        6
+      ],
+      "variables": [
+        "TMP",
+        "DPT",
+        "UGRD",
+        "VGRD",
+        "CAPE"
+      ],
+      "area": "40,-105,30,-90"
+    }
+  },
+  "features": {
+    "profiles": [
+      "surface_core",
+      "pressure_core",
+      "severe_diagnostics"
+    ],
+    "custom_features": [
+      {
+        "name": "custom_srh_500m",
+        "units": "m2/s2",
+        "source": "custom_srh_500m_v1"
+      }
+    ]
+  },
+  "labels": [
+    {
+      "name": "future_reflectivity",
+      "source": "downstream_label_pipeline"
+    }
+  ],
+  "model": {
+    "architecture": "swin_transformer",
+    "task": "forecasting",
+    "lead_hours": 6,
+    "context_steps": 4,
+    "patch_size": 4,
+    "notes": [
+      "optimizer=adamw",
+      "window_size=8"
+    ]
+  },
+  "output": {
+    "format": "WebDataset",
+    "shard_count": 32,
+    "parallelism": 4,
+    "train_fraction": 0.8,
+    "validation_fraction": 0.1
+  }
+}

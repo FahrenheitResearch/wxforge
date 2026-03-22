@@ -1,0 +1,32 @@
+{
+  "dataset_name": "classical_severe_dataset",
+  "generated_at": "2026-03-17T19:03:15.501741200+00:00",
+  "format": "Parquet",
+  "shard_count": 2,
+  "channels": [
+    "t2m",
+    "d2m",
+    "u10",
+    "v10",
+    "mslp",
+    "sbcape",
+    "sbcin",
+    "mlcape",
+    "mlcin",
+    "mucape",
+    "mucin",
+    "srh01",
+    "srh03",
+    "shear06",
+    "stp",
+    "scp",
+    "pwat",
+    "channel_min",
+    "channel_mean",
+    "channel_max",
+    "valid_hour_sin",
+    "valid_hour_cos",
+    "custom_srh_500m"
+  ],
+  "labels": []
+}

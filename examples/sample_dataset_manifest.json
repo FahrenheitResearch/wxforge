@@ -1,0 +1,19 @@
+{
+  "dataset_name": "sample-batch-dataset",
+  "format": "WebDataset",
+  "parallelism": 2,
+  "shard_count": 2,
+  "train_fraction": 0.5,
+  "validation_fraction": 0.0,
+  "samples": [
+    {
+      "file": "examples/sample.grib2",
+      "sample_id": "sample_main"
+    },
+    {
+      "file": "examples/era5_2t_subset.grib",
+      "sample_id": "era5_surface",
+      "messages": [1]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "dataset_name": "hrrr_2t_subset-dataset",
+  "sample_id": "hrrr_2t_subset",
+  "generated_at": "2026-03-16T09:14:02.584007100+00:00",
+  "format": "NpyDirectory",
+  "source": "examples\\hrrr_2t_subset.grib2",
+  "channel_count": 1,
+  "channels": [
+    {
+      "message_no": 1,
+      "name": "2t",
+      "level": "2 m above ground",
+      "units": "K",
+      "width": 1799,
+      "height": 1059,
+      "missing_count": 0,
+      "data_file": "001_2t_2_m_above_ground.npy",
+      "preview_file": "001_2t_2_m_above_ground.png",
+      "stats": {
+        "min": 242.05311584472656,
+        "mean": 279.9294505228423,
+        "max": 302.49061584472656
+      }
+    }
+  ]
+}

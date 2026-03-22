@@ -1,0 +1,17 @@
+{
+  "file": "examples\\era5_2t_subset.grib",
+  "var": "t2m",
+  "message": 1,
+  "shape": [
+    141,
+    281
+  ],
+  "field": {
+    "count": 39621,
+    "mean_abs": 0.0,
+    "rmse": 0.0,
+    "max_abs": 0.0,
+    "p99_abs": 0.0,
+    "mean_bias": 0.0
+  }
+}

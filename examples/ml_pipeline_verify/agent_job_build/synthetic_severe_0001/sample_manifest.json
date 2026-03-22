@@ -1,0 +1,358 @@
+{
+  "dataset_name": "classical_severe_dataset",
+  "sample_id": "synthetic_severe_0001",
+  "generated_at": "2026-03-17T19:04:01.211552+00:00",
+  "format": "NpyDirectory",
+  "source": "examples/agent_job_sample.grib2",
+  "channel_count": 23,
+  "channels": [
+    {
+      "message_no": 0,
+      "name": "t2m",
+      "level": "2 m above ground",
+      "units": "K",
+      "width": 2,
+      "height": 2,
+      "missing_count": 4,
+      "data_file": "t2m.npy",
+      "preview_file": null,
+      "stats": null
+    },
+    {
+      "message_no": 0,
+      "name": "d2m",
+      "level": "2 m above ground",
+      "units": "K",
+      "width": 2,
+      "height": 2,
+      "missing_count": 4,
+      "data_file": "d2m.npy",
+      "preview_file": null,
+      "stats": null
+    },
+    {
+      "message_no": 0,
+      "name": "u10",
+      "level": "10 m above ground",
+      "units": "m/s",
+      "width": 2,
+      "height": 2,
+      "missing_count": 4,
+      "data_file": "u10.npy",
+      "preview_file": null,
+      "stats": null
+    },
+    {
+      "message_no": 0,
+      "name": "v10",
+      "level": "10 m above ground",
+      "units": "m/s",
+      "width": 2,
+      "height": 2,
+      "missing_count": 4,
+      "data_file": "v10.npy",
+      "preview_file": null,
+      "stats": null
+    },
+    {
+      "message_no": 0,
+      "name": "mslp",
+      "level": "mslp",
+      "units": "Pa",
+      "width": 2,
+      "height": 2,
+      "missing_count": 4,
+      "data_file": "mslp.npy",
+      "preview_file": null,
+      "stats": null
+    },
+    {
+      "message_no": 0,
+      "name": "sbcape",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "sbcape.npy",
+      "preview_file": "sbcape.png",
+      "stats": {
+        "min": 0.0,
+        "mean": 857.956600115503,
+        "max": 3431.826400462012
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "sbcin",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "sbcin.npy",
+      "preview_file": "sbcin.png",
+      "stats": {
+        "min": -16.347191922977633,
+        "mean": -4.086797980744408,
+        "max": 0.0
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "mlcape",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "mlcape.npy",
+      "preview_file": "mlcape.png",
+      "stats": {
+        "min": 3627.10629903685,
+        "mean": 4150.407618534741,
+        "max": 4670.750222683208
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "mlcin",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "mlcin.npy",
+      "preview_file": "mlcin.png",
+      "stats": {
+        "min": -26.671186563625977,
+        "mean": -20.282290268580432,
+        "max": -14.49329686941031
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "mucape",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "mucape.npy",
+      "preview_file": "mucape.png",
+      "stats": {
+        "min": 4302.801683963353,
+        "mean": 4852.972002292235,
+        "max": 5399.062378312957
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "mucin",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "mucin.npy",
+      "preview_file": "mucin.png",
+      "stats": {
+        "min": -1.5952191809939864,
+        "mean": -0.3988047952484966,
+        "max": 0.0
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "srh01",
+      "level": "derived",
+      "units": "m2/s2",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "srh01.npy",
+      "preview_file": "srh01.png",
+      "stats": {
+        "min": 65.02352050604935,
+        "mean": 65.36907244357927,
+        "max": 65.7146365725477
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "srh03",
+      "level": "derived",
+      "units": "m2/s2",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "srh03.npy",
+      "preview_file": "srh03.png",
+      "stats": {
+        "min": 149.9982251668492,
+        "mean": 150.18729778636376,
+        "max": 150.3763526645098
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "shear06",
+      "level": "derived",
+      "units": "m/s",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "shear06.npy",
+      "preview_file": "shear06.png",
+      "stats": {
+        "min": 33.664192280012415,
+        "mean": 33.67841562501198,
+        "max": 33.69264320732094
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "stp",
+      "level": "derived",
+      "units": "1",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "stp.npy",
+      "preview_file": "stp.png",
+      "stats": {
+        "min": 0.0,
+        "mean": 0.3758687078107261,
+        "max": 1.5034748312429045
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "scp",
+      "level": "derived",
+      "units": "1",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "scp.npy",
+      "preview_file": "scp.png",
+      "stats": {
+        "min": 5.65514097810796,
+        "mean": 6.342619326805671,
+        "max": 7.0213208653934425
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "pwat",
+      "level": "derived",
+      "units": "mm",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "pwat.npy",
+      "preview_file": "pwat.png",
+      "stats": {
+        "min": 55.304317350802926,
+        "mean": 63.784424306616415,
+        "max": 72.73096986356815
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "channel_min",
+      "level": "channel_min",
+      "units": "varies",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "channel_min.npy",
+      "preview_file": "channel_min.png",
+      "stats": {
+        "min": -26.671186563625977,
+        "mean": -26.671186563625977,
+        "max": -26.671186563625977
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "channel_mean",
+      "level": "channel_mean",
+      "units": "varies",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "channel_mean.npy",
+      "preview_file": "channel_mean.png",
+      "stats": {
+        "min": 783.8303830285685,
+        "mean": 783.8303830285685,
+        "max": 783.8303830285685
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "channel_max",
+      "level": "channel_max",
+      "units": "varies",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "channel_max.npy",
+      "preview_file": "channel_max.png",
+      "stats": {
+        "min": 5399.062378312957,
+        "mean": 5399.062378312957,
+        "max": 5399.062378312957
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "valid_hour_sin",
+      "level": "valid_hour_sin",
+      "units": "1",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "valid_hour_sin.npy",
+      "preview_file": "valid_hour_sin.png",
+      "stats": {
+        "min": -1.0,
+        "mean": -1.0,
+        "max": -1.0
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "valid_hour_cos",
+      "level": "valid_hour_cos",
+      "units": "1",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "valid_hour_cos.npy",
+      "preview_file": "valid_hour_cos.png",
+      "stats": {
+        "min": -1.8369701987210297e-16,
+        "mean": -1.8369701987210297e-16,
+        "max": -1.8369701987210297e-16
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "custom_srh_500m",
+      "level": "custom_srh_500m",
+      "units": "m2/s2",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "custom_srh_500m.npy",
+      "preview_file": "custom_srh_500m.png",
+      "stats": {
+        "min": 33.14457470535513,
+        "mean": 33.48895327729,
+        "max": 33.83334475346437
+      }
+    }
+  ]
+}

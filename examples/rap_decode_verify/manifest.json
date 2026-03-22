@@ -1,0 +1,16 @@
+{
+  "field": {
+    "level": "2 m above ground",
+    "max": 300.68560791015625,
+    "mean": 277.2502454284966,
+    "min": 235.99810791015625,
+    "units": "K",
+    "variable": "2t"
+  },
+  "file": "examples\\rap_2t_subset.grib2",
+  "grid": {
+    "nx": 451,
+    "ny": 337
+  },
+  "message": 1
+}

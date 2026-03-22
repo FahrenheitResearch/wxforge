@@ -1,0 +1,42 @@
+{
+  "dataset_name": "sample-dataset",
+  "sample_id": "sample",
+  "generated_at": "2026-03-16T08:29:27.993944400+00:00",
+  "format": "NpyDirectory",
+  "source": "examples\\sample.grib2",
+  "channel_count": 2,
+  "channels": [
+    {
+      "message_no": 1,
+      "name": "2t",
+      "level": "2 m above ground",
+      "units": "K",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "001_2t_2_m_above_ground.npy",
+      "preview_file": "001_2t_2_m_above_ground.png",
+      "stats": {
+        "min": 251.0,
+        "mean": 252.5,
+        "max": 254.0
+      }
+    },
+    {
+      "message_no": 2,
+      "name": "10u",
+      "level": "10 m above ground",
+      "units": "m/s",
+      "width": 2,
+      "height": 2,
+      "missing_count": 0,
+      "data_file": "002_10u_10_m_above_ground.npy",
+      "preview_file": "002_10u_10_m_above_ground.png",
+      "stats": {
+        "min": 5.0,
+        "mean": 6.5,
+        "max": 8.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "dataset_name": "sample-batch-dataset",
+  "generated_at": "2026-03-17T19:03:59.829577800+00:00",
+  "format": "WebDataset",
+  "shard_count": 2,
+  "channels": [
+    "2t",
+    "10u"
+  ],
+  "labels": []
+}

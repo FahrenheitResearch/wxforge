@@ -1,0 +1,16 @@
+{
+  "field": {
+    "level": "2 m above ground",
+    "max": 302.49061584472656,
+    "mean": 279.9294505228423,
+    "min": 242.05311584472656,
+    "units": "K",
+    "variable": "2t"
+  },
+  "file": "examples\\hrrr_2t_subset.grib2",
+  "grid": {
+    "nx": 1799,
+    "ny": 1059
+  },
+  "message": 1
+}

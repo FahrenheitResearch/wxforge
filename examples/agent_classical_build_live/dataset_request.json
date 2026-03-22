@@ -1,0 +1,16 @@
+{
+  "dataset_name": "classical_severe_dataset",
+  "format": "Parquet",
+  "shard_count": 2,
+  "parallelism": 1,
+  "train_fraction": 0.8,
+  "validation_fraction": 0.1,
+  "samples": [
+    {
+      "file": "examples/agent_job_sample.grib2",
+      "sample_id": "synthetic_severe_0001",
+      "messages": [],
+      "companion_files": []
+    }
+  ]
+}

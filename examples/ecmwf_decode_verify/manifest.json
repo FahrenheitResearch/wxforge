@@ -1,0 +1,16 @@
+{
+  "field": {
+    "level": "2 m above ground",
+    "max": 315.38780212402344,
+    "mean": 277.2192484598899,
+    "min": 212.95030212402344,
+    "units": "K",
+    "variable": "2t"
+  },
+  "file": "examples\\ecmwf_2t_subset.grib2",
+  "grid": {
+    "nx": 1440,
+    "ny": 721
+  },
+  "message": 1
+}

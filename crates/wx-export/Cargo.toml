@@ -1,0 +1,15 @@
+[package]
+name = "wx-export"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Dataset export interfaces for wxforge"
+
+[dependencies]
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+wx-types = { path = "../wx-types" }
+
+[lib]
+path = "src/lib.rs"

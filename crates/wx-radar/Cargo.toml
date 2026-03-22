@@ -1,0 +1,13 @@
+[package]
+name = "wx-radar"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Radar ingest, products, and detection interfaces for wxforge"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+wx-types = { path = "../wx-types" }
+
+[lib]
+path = "src/lib.rs"

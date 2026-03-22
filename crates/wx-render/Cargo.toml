@@ -1,0 +1,13 @@
+[package]
+name = "wx-render"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Deterministic weather rendering interfaces for wxforge"
+
+[dependencies]
+png = "0.17"
+wx-types = { path = "../wx-types" }
+
+[lib]
+path = "src/lib.rs"

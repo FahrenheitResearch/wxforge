@@ -1,0 +1,17 @@
+{
+  "file": "examples\\nam_2t_subset.grib2",
+  "var": "t2m",
+  "message": 1,
+  "shape": [
+    428,
+    614
+  ],
+  "field": {
+    "count": 262792,
+    "mean_abs": 0.0,
+    "rmse": 0.0,
+    "max_abs": 0.0,
+    "p99_abs": 0.0,
+    "mean_bias": 0.0
+  }
+}

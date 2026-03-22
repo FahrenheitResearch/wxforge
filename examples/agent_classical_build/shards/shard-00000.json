@@ -1,0 +1,15 @@
+{
+  "dataset_name": "classical_severe_dataset",
+  "sample_count": 1,
+  "samples": [
+    {
+      "channel_count": 1,
+      "relative_dir": "sample_0001",
+      "sample_id": "sample_0001",
+      "shard_index": 0,
+      "source": "examples/sample.grib2",
+      "split": "Train"
+    }
+  ],
+  "shard_index": 0
+}

@@ -1,0 +1,26 @@
+{
+  "dataset_name": "sample-batch-dataset",
+  "sample_id": "era5_surface",
+  "generated_at": "2026-03-17T19:03:58.252866600+00:00",
+  "format": "NpyDirectory",
+  "source": "examples/era5_2t_subset.grib",
+  "channel_count": 1,
+  "channels": [
+    {
+      "message_no": 1,
+      "name": "2t",
+      "level": "surface",
+      "units": "K",
+      "width": 281,
+      "height": 141,
+      "missing_count": 0,
+      "data_file": "001_2t_surface.npy",
+      "preview_file": "001_2t_surface.png",
+      "stats": {
+        "min": 255.90965270996094,
+        "mean": 280.8974989298475,
+        "max": 301.17332458496094
+      }
+    }
+  ]
+}

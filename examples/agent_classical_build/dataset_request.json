@@ -1,0 +1,17 @@
+{
+  "dataset_name": "classical_severe_dataset",
+  "format": "Parquet",
+  "shard_count": 8,
+  "parallelism": 2,
+  "train_fraction": 0.8,
+  "validation_fraction": 0.1,
+  "samples": [
+    {
+      "file": "examples/sample.grib2",
+      "sample_id": "sample_0001",
+      "messages": [
+        1
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "dataset_name": "era5_t850_subset-dataset",
+  "sample_id": "era5_t850_subset",
+  "generated_at": "2026-03-16T10:13:20.418511300+00:00",
+  "format": "NpyDirectory",
+  "source": "examples\\era5_t850_subset.grib",
+  "channel_count": 1,
+  "channels": [
+    {
+      "message_no": 1,
+      "name": "t",
+      "level": "850 hPa",
+      "units": "K",
+      "width": 281,
+      "height": 141,
+      "missing_count": 0,
+      "data_file": "001_t_850_hpa.npy",
+      "preview_file": "001_t_850_hpa.png",
+      "stats": {
+        "min": 253.56919860839844,
+        "mean": 275.6466313066519,
+        "max": 295.85240173339844
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "dataset_name": "gfs_2t_subset_live-dataset",
+  "generated_at": "2026-03-16T09:52:12.465830+00:00",
+  "format": "NpyDirectory",
+  "shard_count": 1,
+  "channels": [
+    "2t"
+  ],
+  "labels": []
+}

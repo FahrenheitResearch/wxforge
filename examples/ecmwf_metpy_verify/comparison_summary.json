@@ -1,0 +1,184 @@
+{
+  "coordinate_alignment": {
+    "longitude": {
+      "count": 1038240,
+      "mean_abs": 0.0,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mean_bias": 0.0
+    },
+    "latitude": {
+      "count": 1038240,
+      "mean_abs": 0.0,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mean_bias": 0.0
+    }
+  },
+  "products": {
+    "u500": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      }
+    },
+    "v500": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      }
+    },
+    "t850": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      }
+    },
+    "u850": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      }
+    },
+    "v850": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      }
+    },
+    "div500": {
+      "all_points": {
+        "count": 1035360,
+        "mean_abs": 9.305262065341163e-12,
+        "rmse": 1.7997002137037998e-11,
+        "max_abs": 4.072974223515158e-10,
+        "p99_abs": 5.991817778985632e-11,
+        "mean_bias": -4.1290233616339854e-13
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 8.88663303979514e-12,
+        "rmse": 1.4786239314721044e-11,
+        "max_abs": 2.137270947244821e-10,
+        "p99_abs": 5.471125244418517e-11,
+        "mean_bias": 1.1639528289445192e-14
+      }
+    },
+    "vort500": {
+      "all_points": {
+        "count": 1035360,
+        "mean_abs": 1.8553343835181363e-11,
+        "rmse": 2.777330244194224e-11,
+        "max_abs": 3.790127419810857e-10,
+        "p99_abs": 1.0084124776204616e-10,
+        "mean_bias": 3.695897979668925e-14
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 1.8284001474757618e-11,
+        "rmse": 2.687057486718214e-11,
+        "max_abs": 3.790127419810857e-10,
+        "p99_abs": 9.607282580213157e-11,
+        "mean_bias": -6.8482368690589016e-15
+      }
+    },
+    "tadv850": {
+      "all_points": {
+        "count": 1035360,
+        "mean_abs": 3.708588595646271e-11,
+        "rmse": 7.497039898203258e-11,
+        "max_abs": 3.748536634741451e-09,
+        "p99_abs": 2.915400094580767e-10,
+        "mean_bias": 2.60608561594632e-12
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 3.708832829999881e-11,
+        "rmse": 7.494892707348076e-11,
+        "max_abs": 3.748536634741451e-09,
+        "p99_abs": 2.912896976880672e-10,
+        "mean_bias": 2.643719738742227e-12
+      }
+    },
+    "theta850": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 2.6698030920641543e-06,
+        "rmse": 8.952848259248133e-06,
+        "max_abs": 3.0517578125e-05,
+        "p99_abs": 3.0517578125e-05,
+        "mean_bias": -2.6698030920641543e-06
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 2.6786895104736665e-06,
+        "rmse": 8.969229064530819e-06,
+        "max_abs": 3.0517578125e-05,
+        "p99_abs": 3.0517578125e-05,
+        "mean_bias": -2.6786895104736665e-06
+      }
+    }
+  }
+}

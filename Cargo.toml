@@ -1,0 +1,31 @@
+[workspace]
+members = [
+    "crates/wx-types",
+    "crates/wx-grib",
+    "crates/wx-fetch",
+    "crates/wx-calc",
+    "crates/wx-radar",
+    "crates/wx-render",
+    "crates/wx-export",
+    "crates/wx-train",
+    "crates/wx-cli",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+version = "0.1.0"
+authors = ["OpenAI Codex"]
+description = "Rust-first end-to-end weather ingest, calc, radar, render, and training pipeline"
+
+[workspace.lints.clippy]
+dbg_macro = "warn"
+todo = "warn"
+unwrap_used = "warn"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = true

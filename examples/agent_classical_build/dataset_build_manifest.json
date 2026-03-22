@@ -1,0 +1,23 @@
+{
+  "dataset_name": "classical_severe_dataset",
+  "generated_at": "2026-03-17T08:28:27.777897200+00:00",
+  "format": "Parquet",
+  "shard_count": 8,
+  "sample_count": 1,
+  "total_channel_count": 1,
+  "split_counts": {
+    "train": 1,
+    "validation": 0,
+    "test": 0
+  },
+  "samples": [
+    {
+      "sample_id": "sample_0001",
+      "source": "examples/sample.grib2",
+      "relative_dir": "sample_0001",
+      "channel_count": 1,
+      "shard_index": 0,
+      "split": "Train"
+    }
+  ]
+}

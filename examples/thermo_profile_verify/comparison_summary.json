@@ -1,0 +1,274 @@
+{
+  "cases": {
+    "metpy_doc_profile": {
+      "lcl_pressure_hpa": {
+        "count": 1,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "lcl_temperature_c": {
+        "count": 1,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "wet_bulb_temperature_c": {
+        "count": 1,
+        "mean_abs": 3.115508054207794e-06,
+        "rmse": 3.115508054207794e-06,
+        "max_abs": 3.115508054207794e-06,
+        "p99_abs": 3.115508054207794e-06,
+        "mean_bias": 3.115508054207794e-06
+      },
+      "wet_bulb_potential_temperature_k": {
+        "count": 1,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "lifted_index_c": {
+        "count": 1,
+        "mean_abs": 3.323408361488589e-05,
+        "rmse": 3.323408361488589e-05,
+        "max_abs": 3.323408361488589e-05,
+        "p99_abs": 3.323408361488589e-05,
+        "mean_bias": -3.323408361488589e-05
+      },
+      "showalter_index_c": {
+        "count": 1,
+        "mean_abs": 1.7771035411229263e-05,
+        "rmse": 1.7771035411229263e-05,
+        "max_abs": 1.7771035411229263e-05,
+        "p99_abs": 1.7771035411229263e-05,
+        "mean_bias": -1.7771035411229263e-05
+      },
+      "k_index_c": {
+        "count": 1,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "total_totals_c": {
+        "count": 1,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "precipitable_water_mm": {
+        "count": 1,
+        "mean_abs": 0.0011074562094179896,
+        "rmse": 0.0011074562094179896,
+        "max_abs": 0.0011074562094179896,
+        "p99_abs": 0.0011074562094179896,
+        "mean_bias": -0.0011074562094179896
+      },
+      "downdraft_cape_jkg": {
+        "count": 1,
+        "mean_abs": 0.0004099931304608617,
+        "rmse": 0.0004099931304608617,
+        "max_abs": 0.0004099931304608617,
+        "p99_abs": 0.0004099931304608617,
+        "mean_bias": -0.0004099931304608617
+      },
+      "parcel_profile_500_c": {
+        "count": 1,
+        "mean_abs": 3.323408361532998e-05,
+        "rmse": 3.323408361532998e-05,
+        "max_abs": 3.323408361532998e-05,
+        "p99_abs": 3.323408361532998e-05,
+        "mean_bias": 3.323408361532998e-05
+      }
+    },
+    "plains_profile": {
+      "lcl_pressure_hpa": {
+        "count": 1,
+        "mean_abs": 6.821210263296962e-13,
+        "rmse": 6.821210263296962e-13,
+        "max_abs": 6.821210263296962e-13,
+        "p99_abs": 6.821210263296962e-13,
+        "mean_bias": 6.821210263296962e-13
+      },
+      "lcl_temperature_c": {
+        "count": 1,
+        "mean_abs": 5.684341886080802e-14,
+        "rmse": 5.684341886080802e-14,
+        "max_abs": 5.684341886080802e-14,
+        "p99_abs": 5.684341886080802e-14,
+        "mean_bias": 5.684341886080802e-14
+      },
+      "wet_bulb_temperature_c": {
+        "count": 1,
+        "mean_abs": 5.330980947348962e-06,
+        "rmse": 5.330980947348962e-06,
+        "max_abs": 5.330980947348962e-06,
+        "p99_abs": 5.330980947348962e-06,
+        "mean_bias": 5.330980947348962e-06
+      },
+      "wet_bulb_potential_temperature_k": {
+        "count": 1,
+        "mean_abs": 5.684341886080802e-14,
+        "rmse": 5.684341886080802e-14,
+        "max_abs": 5.684341886080802e-14,
+        "p99_abs": 5.684341886080802e-14,
+        "mean_bias": 5.684341886080802e-14
+      },
+      "lifted_index_c": {
+        "count": 1,
+        "mean_abs": 1.8151750172279435e-05,
+        "rmse": 1.8151750172279435e-05,
+        "max_abs": 1.8151750172279435e-05,
+        "p99_abs": 1.8151750172279435e-05,
+        "mean_bias": -1.8151750172279435e-05
+      },
+      "showalter_index_c": {
+        "count": 1,
+        "mean_abs": 1.6153561730902766e-05,
+        "rmse": 1.6153561730902766e-05,
+        "max_abs": 1.6153561730902766e-05,
+        "p99_abs": 1.6153561730902766e-05,
+        "mean_bias": 1.6153561730902766e-05
+      },
+      "k_index_c": {
+        "count": 1,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "total_totals_c": {
+        "count": 1,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "precipitable_water_mm": {
+        "count": 1,
+        "mean_abs": 0.0005220773449110538,
+        "rmse": 0.0005220773449110538,
+        "max_abs": 0.0005220773449110538,
+        "p99_abs": 0.0005220773449110538,
+        "mean_bias": -0.0005220773449110538
+      },
+      "downdraft_cape_jkg": {
+        "count": 1,
+        "mean_abs": 0.002196227736021683,
+        "rmse": 0.002196227736021683,
+        "max_abs": 0.002196227736021683,
+        "p99_abs": 0.002196227736021683,
+        "mean_bias": -0.002196227736021683
+      },
+      "parcel_profile_500_c": {
+        "count": 1,
+        "mean_abs": 1.8151750172279435e-05,
+        "rmse": 1.8151750172279435e-05,
+        "max_abs": 1.8151750172279435e-05,
+        "p99_abs": 1.8151750172279435e-05,
+        "mean_bias": 1.8151750172279435e-05
+      }
+    },
+    "tropical_profile": {
+      "lcl_pressure_hpa": {
+        "count": 1,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "lcl_temperature_c": {
+        "count": 1,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "wet_bulb_temperature_c": {
+        "count": 1,
+        "mean_abs": 5.0820053303368695e-06,
+        "rmse": 5.0820053303368695e-06,
+        "max_abs": 5.0820053303368695e-06,
+        "p99_abs": 5.0820053303368695e-06,
+        "mean_bias": 5.0820053303368695e-06
+      },
+      "wet_bulb_potential_temperature_k": {
+        "count": 1,
+        "mean_abs": 1.1368683772161603e-13,
+        "rmse": 1.1368683772161603e-13,
+        "max_abs": 1.1368683772161603e-13,
+        "p99_abs": 1.1368683772161603e-13,
+        "mean_bias": -1.1368683772161603e-13
+      },
+      "lifted_index_c": {
+        "count": 1,
+        "mean_abs": 3.186292768386778e-05,
+        "rmse": 3.186292768386778e-05,
+        "max_abs": 3.186292768386778e-05,
+        "p99_abs": 3.186292768386778e-05,
+        "mean_bias": -3.186292768386778e-05
+      },
+      "showalter_index_c": {
+        "count": 1,
+        "mean_abs": 1.6035284862603305e-05,
+        "rmse": 1.6035284862603305e-05,
+        "max_abs": 1.6035284862603305e-05,
+        "p99_abs": 1.6035284862603305e-05,
+        "mean_bias": -1.6035284862603305e-05
+      },
+      "k_index_c": {
+        "count": 1,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "total_totals_c": {
+        "count": 1,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "precipitable_water_mm": {
+        "count": 1,
+        "mean_abs": 0.0011888646918265522,
+        "rmse": 0.0011888646918265522,
+        "max_abs": 0.0011888646918265522,
+        "p99_abs": 0.0011888646918265522,
+        "mean_bias": -0.0011888646918265522
+      },
+      "downdraft_cape_jkg": {
+        "count": 1,
+        "mean_abs": 0.0007214220493096946,
+        "rmse": 0.0007214220493096946,
+        "max_abs": 0.0007214220493096946,
+        "p99_abs": 0.0007214220493096946,
+        "mean_bias": -0.0007214220493096946
+      },
+      "parcel_profile_500_c": {
+        "count": 1,
+        "mean_abs": 3.18629276829796e-05,
+        "rmse": 3.18629276829796e-05,
+        "max_abs": 3.18629276829796e-05,
+        "p99_abs": 3.18629276829796e-05,
+        "mean_bias": 3.18629276829796e-05
+      }
+    }
+  }
+}

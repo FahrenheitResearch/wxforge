@@ -1,0 +1,358 @@
+{
+  "dataset_name": "classical_severe_dataset",
+  "sample_id": "gulf_severe_0001",
+  "generated_at": "2026-03-17T18:57:37.411648200+00:00",
+  "format": "NpyDirectory",
+  "source": "examples/severe_gfs_verify_gulf/gfs_tmp_pressure.grib2",
+  "channel_count": 23,
+  "channels": [
+    {
+      "message_no": 0,
+      "name": "t2m",
+      "level": "2 m above ground",
+      "units": "K",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 1038240,
+      "data_file": "t2m.npy",
+      "preview_file": null,
+      "stats": null
+    },
+    {
+      "message_no": 0,
+      "name": "d2m",
+      "level": "2 m above ground",
+      "units": "K",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 1038240,
+      "data_file": "d2m.npy",
+      "preview_file": null,
+      "stats": null
+    },
+    {
+      "message_no": 0,
+      "name": "u10",
+      "level": "10 m above ground",
+      "units": "m/s",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 1038240,
+      "data_file": "u10.npy",
+      "preview_file": null,
+      "stats": null
+    },
+    {
+      "message_no": 0,
+      "name": "v10",
+      "level": "10 m above ground",
+      "units": "m/s",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 1038240,
+      "data_file": "v10.npy",
+      "preview_file": null,
+      "stats": null
+    },
+    {
+      "message_no": 0,
+      "name": "mslp",
+      "level": "mslp",
+      "units": "Pa",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 1038240,
+      "data_file": "mslp.npy",
+      "preview_file": null,
+      "stats": null
+    },
+    {
+      "message_no": 0,
+      "name": "sbcape",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "sbcape.npy",
+      "preview_file": "sbcape.png",
+      "stats": {
+        "min": -546.145175433769,
+        "mean": 285.4643945549527,
+        "max": 8085.131748029651
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "sbcin",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "sbcin.npy",
+      "preview_file": "sbcin.png",
+      "stats": {
+        "min": -989.0308102349275,
+        "mean": -10.723187888545132,
+        "max": 0.0
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "mlcape",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "mlcape.npy",
+      "preview_file": "mlcape.png",
+      "stats": {
+        "min": -643.4324448091502,
+        "mean": 100.37268029009242,
+        "max": 2916.7542047956636
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "mlcin",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "mlcin.npy",
+      "preview_file": "mlcin.png",
+      "stats": {
+        "min": -951.1648196306705,
+        "mean": -15.328517635658546,
+        "max": 0.0
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "mucape",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "mucape.npy",
+      "preview_file": "mucape.png",
+      "stats": {
+        "min": -546.145175433769,
+        "mean": 286.8548743298817,
+        "max": 8085.131748029651
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "mucin",
+      "level": "derived",
+      "units": "J/kg",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "mucin.npy",
+      "preview_file": "mucin.png",
+      "stats": {
+        "min": -989.0308102349275,
+        "mean": -9.3959806753004,
+        "max": 0.0
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "srh01",
+      "level": "derived",
+      "units": "m2/s2",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "srh01.npy",
+      "preview_file": "srh01.png",
+      "stats": {
+        "min": -502.29215643652196,
+        "mean": 18.420756181386466,
+        "max": 1001.1778643873756
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "srh03",
+      "level": "derived",
+      "units": "m2/s2",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "srh03.npy",
+      "preview_file": "srh03.png",
+      "stats": {
+        "min": -614.3221570307334,
+        "mean": 61.789005407439134,
+        "max": 1441.5491212529266
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "shear06",
+      "level": "derived",
+      "units": "m/s",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "shear06.npy",
+      "preview_file": "shear06.png",
+      "stats": {
+        "min": 0.01110486183640309,
+        "mean": 14.571583381390589,
+        "max": 79.72907625563474
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "stp",
+      "level": "derived",
+      "units": "1",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "stp.npy",
+      "preview_file": "stp.png",
+      "stats": {
+        "min": -0.7601767690555864,
+        "mean": 0.0009998792660902314,
+        "max": 2.7238248230136435
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "scp",
+      "level": "derived",
+      "units": "1",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "scp.npy",
+      "preview_file": "scp.png",
+      "stats": {
+        "min": -5.62405588923168,
+        "mean": 0.004270757475222301,
+        "max": 12.745968773066007
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "pwat",
+      "level": "derived",
+      "units": "mm",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "pwat.npy",
+      "preview_file": "pwat.png",
+      "stats": {
+        "min": 0.45918795873548696,
+        "mean": 20.53686050461515,
+        "max": 73.93649679878472
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "channel_min",
+      "level": "channel_min",
+      "units": "varies",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 0,
+      "data_file": "channel_min.npy",
+      "preview_file": "channel_min.png",
+      "stats": {
+        "min": -989.0308102349275,
+        "mean": -989.0308102368391,
+        "max": -989.0308102349275
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "channel_mean",
+      "level": "channel_mean",
+      "units": "varies",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 0,
+      "data_file": "channel_mean.npy",
+      "preview_file": "channel_mean.png",
+      "stats": {
+        "min": 58.37757771233231,
+        "mean": 58.37757771304342,
+        "max": 58.37757771233231
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "channel_max",
+      "level": "channel_max",
+      "units": "varies",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 0,
+      "data_file": "channel_max.npy",
+      "preview_file": "channel_max.png",
+      "stats": {
+        "min": 8085.131748029651,
+        "mean": 8085.131748150087,
+        "max": 8085.131748029651
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "valid_hour_sin",
+      "level": "valid_hour_sin",
+      "units": "1",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 0,
+      "data_file": "valid_hour_sin.npy",
+      "preview_file": "valid_hour_sin.png",
+      "stats": {
+        "min": -1.0,
+        "mean": -1.0,
+        "max": -1.0
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "valid_hour_cos",
+      "level": "valid_hour_cos",
+      "units": "1",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 0,
+      "data_file": "valid_hour_cos.npy",
+      "preview_file": "valid_hour_cos.png",
+      "stats": {
+        "min": -1.8369701987210297e-16,
+        "mean": -1.8369701987406275e-16,
+        "max": -1.8369701987210297e-16
+      }
+    },
+    {
+      "message_no": 0,
+      "name": "custom_srh_500m",
+      "level": "custom_srh_500m",
+      "units": "m2/s2",
+      "width": 1440,
+      "height": 721,
+      "missing_count": 92905,
+      "data_file": "custom_srh_500m.npy",
+      "preview_file": "custom_srh_500m.png",
+      "stats": {
+        "min": -370.5544428296592,
+        "mean": 6.340771173267903,
+        "max": 642.3256422241637
+      }
+    }
+  ]
+}

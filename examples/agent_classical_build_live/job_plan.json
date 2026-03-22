@@ -1,0 +1,349 @@
+{
+  "job_name": "classical_severe_job",
+  "description": "Starter classical-ML severe weather job with a custom SRH feature contract.",
+  "training": {
+    "spec": {
+      "dataset_name": "classical_severe_dataset",
+      "channels": [
+        {
+          "name": "t2m",
+          "units": "K"
+        },
+        {
+          "name": "d2m",
+          "units": "K"
+        },
+        {
+          "name": "u10",
+          "units": "m/s"
+        },
+        {
+          "name": "v10",
+          "units": "m/s"
+        },
+        {
+          "name": "mslp",
+          "units": "Pa"
+        },
+        {
+          "name": "sbcape",
+          "units": "J/kg"
+        },
+        {
+          "name": "sbcin",
+          "units": "J/kg"
+        },
+        {
+          "name": "mlcape",
+          "units": "J/kg"
+        },
+        {
+          "name": "mlcin",
+          "units": "J/kg"
+        },
+        {
+          "name": "mucape",
+          "units": "J/kg"
+        },
+        {
+          "name": "mucin",
+          "units": "J/kg"
+        },
+        {
+          "name": "srh01",
+          "units": "m2/s2"
+        },
+        {
+          "name": "srh03",
+          "units": "m2/s2"
+        },
+        {
+          "name": "shear06",
+          "units": "m/s"
+        },
+        {
+          "name": "stp",
+          "units": "1"
+        },
+        {
+          "name": "scp",
+          "units": "1"
+        },
+        {
+          "name": "pwat",
+          "units": "mm"
+        },
+        {
+          "name": "channel_min",
+          "units": "varies"
+        },
+        {
+          "name": "channel_mean",
+          "units": "varies"
+        },
+        {
+          "name": "channel_max",
+          "units": "varies"
+        },
+        {
+          "name": "valid_hour_sin",
+          "units": "1"
+        },
+        {
+          "name": "valid_hour_cos",
+          "units": "1"
+        },
+        {
+          "name": "custom_srh_500m",
+          "units": "m2/s2"
+        }
+      ],
+      "labels": [
+        "hail_event"
+      ]
+    },
+    "labels": [
+      {
+        "name": "hail_event",
+        "source": "report_or_warning"
+      }
+    ],
+    "export": {
+      "spec": {
+        "dataset_name": "classical_severe_dataset",
+        "channels": [
+          {
+            "name": "t2m",
+            "units": "K"
+          },
+          {
+            "name": "d2m",
+            "units": "K"
+          },
+          {
+            "name": "u10",
+            "units": "m/s"
+          },
+          {
+            "name": "v10",
+            "units": "m/s"
+          },
+          {
+            "name": "mslp",
+            "units": "Pa"
+          },
+          {
+            "name": "sbcape",
+            "units": "J/kg"
+          },
+          {
+            "name": "sbcin",
+            "units": "J/kg"
+          },
+          {
+            "name": "mlcape",
+            "units": "J/kg"
+          },
+          {
+            "name": "mlcin",
+            "units": "J/kg"
+          },
+          {
+            "name": "mucape",
+            "units": "J/kg"
+          },
+          {
+            "name": "mucin",
+            "units": "J/kg"
+          },
+          {
+            "name": "srh01",
+            "units": "m2/s2"
+          },
+          {
+            "name": "srh03",
+            "units": "m2/s2"
+          },
+          {
+            "name": "shear06",
+            "units": "m/s"
+          },
+          {
+            "name": "stp",
+            "units": "1"
+          },
+          {
+            "name": "scp",
+            "units": "1"
+          },
+          {
+            "name": "pwat",
+            "units": "mm"
+          },
+          {
+            "name": "channel_min",
+            "units": "varies"
+          },
+          {
+            "name": "channel_mean",
+            "units": "varies"
+          },
+          {
+            "name": "channel_max",
+            "units": "varies"
+          },
+          {
+            "name": "valid_hour_sin",
+            "units": "1"
+          },
+          {
+            "name": "valid_hour_cos",
+            "units": "1"
+          },
+          {
+            "name": "custom_srh_500m",
+            "units": "m2/s2"
+          }
+        ],
+        "labels": [
+          "hail_event"
+        ]
+      },
+      "format": "Parquet",
+      "shard_count": 2
+    }
+  },
+  "dataset_build_request": {
+    "dataset_name": "classical_severe_dataset",
+    "format": "Parquet",
+    "shard_count": 2,
+    "parallelism": 1,
+    "train_fraction": 0.8,
+    "validation_fraction": 0.1,
+    "samples": [
+      {
+        "file": "examples/agent_job_sample.grib2",
+        "sample_id": "synthetic_severe_0001",
+        "messages": [],
+        "companion_files": []
+      }
+    ]
+  },
+  "fetch_plan": null,
+  "model_recipe": {
+    "architecture": "classical_ml",
+    "task": "binary_classification",
+    "input_layout": "tabular",
+    "trainer_family": "xgboost_or_tabular_mlp",
+    "recommended_loss": "binary_cross_entropy",
+    "recommended_format": "Parquet",
+    "channels": [
+      {
+        "name": "t2m",
+        "units": "K"
+      },
+      {
+        "name": "d2m",
+        "units": "K"
+      },
+      {
+        "name": "u10",
+        "units": "m/s"
+      },
+      {
+        "name": "v10",
+        "units": "m/s"
+      },
+      {
+        "name": "mslp",
+        "units": "Pa"
+      },
+      {
+        "name": "sbcape",
+        "units": "J/kg"
+      },
+      {
+        "name": "sbcin",
+        "units": "J/kg"
+      },
+      {
+        "name": "mlcape",
+        "units": "J/kg"
+      },
+      {
+        "name": "mlcin",
+        "units": "J/kg"
+      },
+      {
+        "name": "mucape",
+        "units": "J/kg"
+      },
+      {
+        "name": "mucin",
+        "units": "J/kg"
+      },
+      {
+        "name": "srh01",
+        "units": "m2/s2"
+      },
+      {
+        "name": "srh03",
+        "units": "m2/s2"
+      },
+      {
+        "name": "shear06",
+        "units": "m/s"
+      },
+      {
+        "name": "stp",
+        "units": "1"
+      },
+      {
+        "name": "scp",
+        "units": "1"
+      },
+      {
+        "name": "pwat",
+        "units": "mm"
+      },
+      {
+        "name": "channel_min",
+        "units": "varies"
+      },
+      {
+        "name": "channel_mean",
+        "units": "varies"
+      },
+      {
+        "name": "channel_max",
+        "units": "varies"
+      },
+      {
+        "name": "valid_hour_sin",
+        "units": "1"
+      },
+      {
+        "name": "valid_hour_cos",
+        "units": "1"
+      },
+      {
+        "name": "custom_srh_500m",
+        "units": "m2/s2"
+      }
+    ],
+    "labels": [
+      "hail_event"
+    ],
+    "notes": [
+      "trainer_family=xgboost",
+      "row_aggregation=storm_window_stats"
+    ]
+  },
+  "assumptions": [
+    "architecture_defaults=ClassicalMl",
+    "task=BinaryClassification",
+    "channel_count=23",
+    "custom_features=1"
+  ],
+  "warnings": []
+}

@@ -1,0 +1,10 @@
+{
+  "dataset_name": "classical_severe_dataset",
+  "generated_at": "2026-03-17T08:28:27.777626500+00:00",
+  "format": "Parquet",
+  "shard_count": 8,
+  "channels": [
+    "2t"
+  ],
+  "labels": []
+}

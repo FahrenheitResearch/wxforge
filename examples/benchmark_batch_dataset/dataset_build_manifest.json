@@ -1,0 +1,31 @@
+{
+  "dataset_name": "sample-batch-dataset",
+  "generated_at": "2026-03-17T19:03:58.253470400+00:00",
+  "format": "WebDataset",
+  "shard_count": 2,
+  "sample_count": 2,
+  "total_channel_count": 3,
+  "split_counts": {
+    "train": 1,
+    "validation": 0,
+    "test": 1
+  },
+  "samples": [
+    {
+      "sample_id": "sample_main",
+      "source": "examples/sample.grib2",
+      "relative_dir": "sample_main",
+      "channel_count": 2,
+      "shard_index": 0,
+      "split": "Train"
+    },
+    {
+      "sample_id": "era5_surface",
+      "source": "examples/era5_2t_subset.grib",
+      "relative_dir": "era5_surface",
+      "channel_count": 1,
+      "shard_index": 1,
+      "split": "Test"
+    }
+  ]
+}

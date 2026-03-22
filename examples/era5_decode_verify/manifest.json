@@ -1,0 +1,16 @@
+{
+  "field": {
+    "level": "surface",
+    "max": 301.17332458496094,
+    "mean": 280.8974989298475,
+    "min": 255.90965270996094,
+    "units": "K",
+    "variable": "2t"
+  },
+  "file": "examples\\era5_2t_subset.grib",
+  "grid": {
+    "nx": 281,
+    "ny": 141
+  },
+  "message": 1
+}

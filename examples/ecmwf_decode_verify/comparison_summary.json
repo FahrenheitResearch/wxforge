@@ -1,0 +1,17 @@
+{
+  "file": "examples\\ecmwf_2t_subset.grib2",
+  "var": "mx2t3",
+  "message": 1,
+  "shape": [
+    721,
+    1440
+  ],
+  "field": {
+    "count": 1038240,
+    "mean_abs": 0.0,
+    "rmse": 0.0,
+    "max_abs": 0.0,
+    "p99_abs": 0.0,
+    "mean_bias": 0.0
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "job_name": "agent_smoke_dataset-job",
+  "dataset_name": "agent_smoke_dataset",
+  "description": "Starter agent job for SwinTransformer Forecasting workflow",
+  "data_source": {
+    "kind": "existing_grib_files",
+    "samples": [
+      {
+        "file": "examples/sample.grib2",
+        "sample_id": "sample_0001",
+        "messages": [
+          1
+        ],
+        "companion_files": []
+      }
+    ]
+  },
+  "features": {
+    "profiles": [
+      "surface_core",
+      "pressure_core",
+      "severe_diagnostics"
+    ],
+    "extra_channels": [],
+    "custom_features": []
+  },
+  "labels": [
+    {
+      "name": "future_target",
+      "source": "agent_default"
+    }
+  ],
+  "model": {
+    "architecture": "swin_transformer",
+    "task": "forecasting",
+    "lead_hours": 6,
+    "context_steps": 4,
+    "patch_size": 4,
+    "notes": [
+      "Patch-based raster encoder expects stable channel ordering",
+      "Keep context frames aligned on a fixed grid for spatiotemporal attention"
+    ]
+  },
+  "output": {
+    "format": "WebDataset",
+    "shard_count": 96,
+    "parallelism": 1,
+    "train_fraction": 0.8,
+    "validation_fraction": 0.1
+  }
+}

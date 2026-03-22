@@ -1,0 +1,184 @@
+{
+  "coordinate_alignment": {
+    "longitude": {
+      "count": 1038240,
+      "mean_abs": 0.0,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mean_bias": 0.0
+    },
+    "latitude": {
+      "count": 1038240,
+      "mean_abs": 0.0,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mean_bias": 0.0
+    }
+  },
+  "products": {
+    "u500": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      }
+    },
+    "v500": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      }
+    },
+    "t850": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      }
+    },
+    "u850": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      }
+    },
+    "v850": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "mean_bias": 0.0
+      }
+    },
+    "div500": {
+      "all_points": {
+        "count": 1035360,
+        "mean_abs": 2.5138138337010824e-11,
+        "rmse": 9.955416676951791e-11,
+        "max_abs": 6.148784773550055e-09,
+        "p99_abs": 2.8094500368475685e-10,
+        "mean_bias": -1.7081687594613342e-15
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 2.244588624612522e-11,
+        "rmse": 6.56778162670221e-11,
+        "max_abs": 3.061986819668681e-09,
+        "p99_abs": 2.417632751947847e-10,
+        "mean_bias": 1.9421408267633292e-14
+      }
+    },
+    "vort500": {
+      "all_points": {
+        "count": 1035360,
+        "mean_abs": 3.200689881437182e-11,
+        "rmse": 9.927156946773263e-11,
+        "max_abs": 6.124311024350952e-09,
+        "p99_abs": 2.85021657979109e-10,
+        "mean_bias": -5.789291712838155e-15
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 2.9543239312903515e-11,
+        "rmse": 7.086732090447382e-11,
+        "max_abs": 3.0727964086239585e-09,
+        "p99_abs": 2.5526776497924734e-10,
+        "mean_bias": -1.123565718563784e-14
+      }
+    },
+    "tadv850": {
+      "all_points": {
+        "count": 1035360,
+        "mean_abs": 3.079032875856315e-09,
+        "rmse": 1.1071072898128028e-08,
+        "max_abs": 8.519442330564447e-07,
+        "p99_abs": 2.937711248874821e-08,
+        "mean_bias": 5.239365297310896e-12
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 2.92415005705794e-09,
+        "rmse": 8.834608655237613e-09,
+        "max_abs": 4.7261839569292066e-07,
+        "p99_abs": 2.7140354999631896e-08,
+        "mean_bias": 4.425944758055958e-12
+      }
+    },
+    "theta850": {
+      "all_points": {
+        "count": 1038240,
+        "mean_abs": 7.611758390401063e-06,
+        "rmse": 1.512986802900566e-05,
+        "max_abs": 3.0517578125e-05,
+        "p99_abs": 3.0517578125e-05,
+        "mean_bias": -2.9384750011136635e-06
+      },
+      "core_points": {
+        "count": 1029612,
+        "mean_abs": 7.635115028464607e-06,
+        "rmse": 1.5152754461728037e-05,
+        "max_abs": 3.0517578125e-05,
+        "p99_abs": 3.0517578125e-05,
+        "mean_bias": -2.9486347352509974e-06
+      }
+    }
+  }
+}

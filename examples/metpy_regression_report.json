@@ -1,0 +1,1933 @@
+{
+  "generated_at_utc": "2026-03-17T19:03:35.581606+00:00",
+  "python": "C:\\Users\\drew\\wmt3\\.venv\\Scripts\\python.exe",
+  "cases": [
+    {
+      "name": "gfs_maps",
+      "description": "Large-area GFS analysis map parity against MetPy.",
+      "summary_path": "examples\\gfs_metpy_verify\\comparison_summary.json",
+      "check_count": 15,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "coordinate_alignment.longitude.max_abs",
+          "description": "longitude grid alignment",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "coordinate_alignment.latitude.max_abs",
+          "description": "latitude grid alignment",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.u500.all_points.max_abs",
+          "description": "u500 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.v500.all_points.max_abs",
+          "description": "v500 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.t850.all_points.max_abs",
+          "description": "t850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.u850.all_points.max_abs",
+          "description": "u850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.v850.all_points.max_abs",
+          "description": "v850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.div500.core_points.mean_abs",
+          "description": "500-hPa divergence core mean abs",
+          "actual": 2.1757131819265243e-11,
+          "max_allowed": 1e-08,
+          "passed": true
+        },
+        {
+          "path": "products.div500.core_points.max_abs",
+          "description": "500-hPa divergence core max abs",
+          "actual": 3.063414091435167e-09,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.vort500.core_points.mean_abs",
+          "description": "500-hPa vorticity core mean abs",
+          "actual": 2.868758721771901e-11,
+          "max_allowed": 1e-08,
+          "passed": true
+        },
+        {
+          "path": "products.vort500.core_points.max_abs",
+          "description": "500-hPa vorticity core max abs",
+          "actual": 3.092176149166329e-09,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.tadv850.core_points.mean_abs",
+          "description": "850-hPa temperature advection core mean abs",
+          "actual": 3.0093981373583544e-09,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.tadv850.core_points.max_abs",
+          "description": "850-hPa temperature advection core max abs",
+          "actual": 6.829046681936608e-07,
+          "max_allowed": 1e-05,
+          "passed": true
+        },
+        {
+          "path": "products.theta850.all_points.mean_abs",
+          "description": "850-hPa theta mean abs",
+          "actual": 7.66156579151527e-06,
+          "max_allowed": 1e-05,
+          "passed": true
+        },
+        {
+          "path": "products.theta850.all_points.max_abs",
+          "description": "850-hPa theta max abs",
+          "actual": 3.0517578125e-05,
+          "max_allowed": 5e-05,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "gfs_maps_f006",
+      "description": "Large-area GFS +6h pressure-map parity against MetPy.",
+      "summary_path": "examples\\gfs_metpy_verify_f006\\comparison_summary.json",
+      "check_count": 15,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "coordinate_alignment.longitude.max_abs",
+          "description": "longitude grid alignment",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "coordinate_alignment.latitude.max_abs",
+          "description": "latitude grid alignment",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.u500.all_points.max_abs",
+          "description": "u500 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.v500.all_points.max_abs",
+          "description": "v500 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.t850.all_points.max_abs",
+          "description": "t850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.u850.all_points.max_abs",
+          "description": "u850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.v850.all_points.max_abs",
+          "description": "v850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.div500.core_points.mean_abs",
+          "description": "500-hPa divergence core mean abs",
+          "actual": 2.244588624612522e-11,
+          "max_allowed": 1e-08,
+          "passed": true
+        },
+        {
+          "path": "products.div500.core_points.max_abs",
+          "description": "500-hPa divergence core max abs",
+          "actual": 3.061986819668681e-09,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.vort500.core_points.mean_abs",
+          "description": "500-hPa vorticity core mean abs",
+          "actual": 2.9543239312903515e-11,
+          "max_allowed": 1e-08,
+          "passed": true
+        },
+        {
+          "path": "products.vort500.core_points.max_abs",
+          "description": "500-hPa vorticity core max abs",
+          "actual": 3.0727964086239585e-09,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.tadv850.core_points.mean_abs",
+          "description": "850-hPa temperature advection core mean abs",
+          "actual": 2.92415005705794e-09,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.tadv850.core_points.max_abs",
+          "description": "850-hPa temperature advection core max abs",
+          "actual": 4.7261839569292066e-07,
+          "max_allowed": 1e-05,
+          "passed": true
+        },
+        {
+          "path": "products.theta850.all_points.mean_abs",
+          "description": "850-hPa theta mean abs",
+          "actual": 7.611758390401063e-06,
+          "max_allowed": 1e-05,
+          "passed": true
+        },
+        {
+          "path": "products.theta850.all_points.max_abs",
+          "description": "850-hPa theta max abs",
+          "actual": 3.0517578125e-05,
+          "max_allowed": 5e-05,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "gfs_maps_f012",
+      "description": "Large-area GFS +12h pressure-map parity against MetPy.",
+      "summary_path": "examples\\gfs_metpy_verify_f012\\comparison_summary.json",
+      "check_count": 15,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "coordinate_alignment.longitude.max_abs",
+          "description": "longitude grid alignment",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "coordinate_alignment.latitude.max_abs",
+          "description": "latitude grid alignment",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.u500.all_points.max_abs",
+          "description": "u500 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.v500.all_points.max_abs",
+          "description": "v500 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.t850.all_points.max_abs",
+          "description": "t850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.u850.all_points.max_abs",
+          "description": "u850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.v850.all_points.max_abs",
+          "description": "v850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.div500.core_points.mean_abs",
+          "description": "500-hPa divergence core mean abs",
+          "actual": 2.2322808187614905e-11,
+          "max_allowed": 1e-08,
+          "passed": true
+        },
+        {
+          "path": "products.div500.core_points.max_abs",
+          "description": "500-hPa divergence core max abs",
+          "actual": 3.068330423262487e-09,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.vort500.core_points.mean_abs",
+          "description": "500-hPa vorticity core mean abs",
+          "actual": 2.986807467399919e-11,
+          "max_allowed": 1e-08,
+          "passed": true
+        },
+        {
+          "path": "products.vort500.core_points.max_abs",
+          "description": "500-hPa vorticity core max abs",
+          "actual": 3.0727964086510635e-09,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.tadv850.core_points.mean_abs",
+          "description": "850-hPa temperature advection core mean abs",
+          "actual": 3.0285429781123383e-09,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.tadv850.core_points.max_abs",
+          "description": "850-hPa temperature advection core max abs",
+          "actual": 5.418964982941733e-07,
+          "max_allowed": 1e-05,
+          "passed": true
+        },
+        {
+          "path": "products.theta850.all_points.mean_abs",
+          "description": "850-hPa theta mean abs",
+          "actual": 7.588787316945324e-06,
+          "max_allowed": 1e-05,
+          "passed": true
+        },
+        {
+          "path": "products.theta850.all_points.max_abs",
+          "description": "850-hPa theta max abs",
+          "actual": 3.0517578125e-05,
+          "max_allowed": 5e-05,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "era5_maps",
+      "description": "ERA5 pressure-level map parity against MetPy on a CONUS crop.",
+      "summary_path": "examples\\era5_metpy_verify\\comparison_summary.json",
+      "check_count": 15,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "coordinate_alignment.longitude.max_abs",
+          "description": "longitude grid alignment",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "coordinate_alignment.latitude.max_abs",
+          "description": "latitude grid alignment",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.u500.all_points.max_abs",
+          "description": "u500 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.v500.all_points.max_abs",
+          "description": "v500 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.t850.all_points.max_abs",
+          "description": "t850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.u850.all_points.max_abs",
+          "description": "u850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.v850.all_points.max_abs",
+          "description": "v850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.div500.core_points.mean_abs",
+          "description": "500-hPa divergence core mean abs",
+          "actual": 6.158990049998697e-12,
+          "max_allowed": 1e-08,
+          "passed": true
+        },
+        {
+          "path": "products.div500.core_points.max_abs",
+          "description": "500-hPa divergence core max abs",
+          "actual": 7.949633491636035e-11,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.vort500.core_points.mean_abs",
+          "description": "500-hPa vorticity core mean abs",
+          "actual": 1.9615616836352412e-11,
+          "max_allowed": 1e-08,
+          "passed": true
+        },
+        {
+          "path": "products.vort500.core_points.max_abs",
+          "description": "500-hPa vorticity core max abs",
+          "actual": 2.2480127790736396e-10,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.tadv850.core_points.mean_abs",
+          "description": "850-hPa temperature advection core mean abs",
+          "actual": 4.576585789504506e-11,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.tadv850.core_points.max_abs",
+          "description": "850-hPa temperature advection core max abs",
+          "actual": 6.49748799577167e-09,
+          "max_allowed": 1e-05,
+          "passed": true
+        },
+        {
+          "path": "products.theta850.all_points.mean_abs",
+          "description": "850-hPa theta mean abs",
+          "actual": 1.8530372644083946e-05,
+          "max_allowed": 2.5e-05,
+          "passed": true
+        },
+        {
+          "path": "products.theta850.all_points.max_abs",
+          "description": "850-hPa theta max abs",
+          "actual": 3.0517578125e-05,
+          "max_allowed": 5e-05,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "ecmwf_maps",
+      "description": "ECMWF open-data pressure-level map parity against MetPy.",
+      "summary_path": "examples\\ecmwf_metpy_verify\\comparison_summary.json",
+      "check_count": 15,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "coordinate_alignment.longitude.max_abs",
+          "description": "longitude grid alignment",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "coordinate_alignment.latitude.max_abs",
+          "description": "latitude grid alignment",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.u500.all_points.max_abs",
+          "description": "u500 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.v500.all_points.max_abs",
+          "description": "v500 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.t850.all_points.max_abs",
+          "description": "t850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.u850.all_points.max_abs",
+          "description": "u850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.v850.all_points.max_abs",
+          "description": "v850 exact field parity",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "products.div500.core_points.mean_abs",
+          "description": "500-hPa divergence core mean abs",
+          "actual": 8.88663303979514e-12,
+          "max_allowed": 1e-08,
+          "passed": true
+        },
+        {
+          "path": "products.div500.core_points.max_abs",
+          "description": "500-hPa divergence core max abs",
+          "actual": 2.137270947244821e-10,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.vort500.core_points.mean_abs",
+          "description": "500-hPa vorticity core mean abs",
+          "actual": 1.8284001474757618e-11,
+          "max_allowed": 1e-08,
+          "passed": true
+        },
+        {
+          "path": "products.vort500.core_points.max_abs",
+          "description": "500-hPa vorticity core max abs",
+          "actual": 3.790127419810857e-10,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.tadv850.core_points.mean_abs",
+          "description": "850-hPa temperature advection core mean abs",
+          "actual": 3.708832829999881e-11,
+          "max_allowed": 1e-07,
+          "passed": true
+        },
+        {
+          "path": "products.tadv850.core_points.max_abs",
+          "description": "850-hPa temperature advection core max abs",
+          "actual": 3.748536634741451e-09,
+          "max_allowed": 1e-05,
+          "passed": true
+        },
+        {
+          "path": "products.theta850.all_points.mean_abs",
+          "description": "850-hPa theta mean abs",
+          "actual": 2.6698030920641543e-06,
+          "max_allowed": 1e-05,
+          "passed": true
+        },
+        {
+          "path": "products.theta850.all_points.max_abs",
+          "description": "850-hPa theta max abs",
+          "actual": 3.0517578125e-05,
+          "max_allowed": 5e-05,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "severe_plains",
+      "description": "Cool-season/plains severe profile parity against MetPy.",
+      "summary_path": "examples\\severe_gfs_verify\\metpy_compare\\comparison_summary.json",
+      "check_count": 30,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "products.sbcape.mean_abs",
+          "description": "surface CAPE mean abs",
+          "actual": 6.665626490049584e-06,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.sbcape.max_abs",
+          "description": "surface CAPE max abs",
+          "actual": 0.00037030601366438987,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.sbcin.mean_abs",
+          "description": "surface CIN mean abs",
+          "actual": 4.859902380376883e-06,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.sbcin.max_abs",
+          "description": "surface CIN max abs",
+          "actual": 0.0005762668806825744,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.h_lcl.mean_abs",
+          "description": "surface LCL height mean abs",
+          "actual": 0.0001563855091912373,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.h_lcl.max_abs",
+          "description": "surface LCL height max abs",
+          "actual": 0.0004310748158786737,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mlcape.mean_abs",
+          "description": "mixed-layer CAPE mean abs",
+          "actual": 3.0408063288247135e-07,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mlcape.max_abs",
+          "description": "mixed-layer CAPE max abs",
+          "actual": 3.6793756578779035e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mlcin.mean_abs",
+          "description": "mixed-layer CIN mean abs",
+          "actual": 7.453550957336927e-07,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.mlcin.max_abs",
+          "description": "mixed-layer CIN max abs",
+          "actual": 9.018796658377681e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mucape.mean_abs",
+          "description": "most-unstable CAPE mean abs",
+          "actual": 5.3693056301657756e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mucape.max_abs",
+          "description": "most-unstable CAPE max abs",
+          "actual": 0.0037954756020326386,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mucin.mean_abs",
+          "description": "most-unstable CIN mean abs",
+          "actual": 7.308303928525072e-07,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.mucin.max_abs",
+          "description": "most-unstable CIN max abs",
+          "actual": 8.825395880762699e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mu_start_p.max_abs",
+          "description": "most-unstable parcel start pressure max abs",
+          "actual": 0.0,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.shear06.max_abs",
+          "description": "0-6 km bulk shear max abs",
+          "actual": 6.26286267646492e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.rm_u.max_abs",
+          "description": "Bunkers right-mover u max abs",
+          "actual": 3.0479095229907216e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.rm_v.max_abs",
+          "description": "Bunkers right-mover v max abs",
+          "actual": 2.5138917791878157e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.srh01.max_abs",
+          "description": "0-1 km SRH max abs",
+          "actual": 3.461575749952317e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.stp.max_abs",
+          "description": "STP max abs",
+          "actual": 6.815084207176247e-07,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.li.mean_abs",
+          "description": "lifted index mean abs",
+          "actual": 2.5958581288197957e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.li.max_abs",
+          "description": "lifted index max abs",
+          "actual": 5.897435181623223e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.showalter.mean_abs",
+          "description": "Showalter index mean abs",
+          "actual": 1.8881962820049103e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.showalter.max_abs",
+          "description": "Showalter index max abs",
+          "actual": 4.7102594379566654e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.k_index.mean_abs",
+          "description": "K-index mean abs",
+          "actual": 1.4597925745797775e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.k_index.max_abs",
+          "description": "K-index max abs",
+          "actual": 4.190004634097022e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.total_totals.mean_abs",
+          "description": "total totals mean abs",
+          "actual": 1.654315772326254e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.total_totals.max_abs",
+          "description": "total totals max abs",
+          "actual": 5.529107775714692e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.pwat.mean_abs",
+          "description": "precipitable water mean abs",
+          "actual": 0.0001160860987185472,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.pwat.max_abs",
+          "description": "precipitable water max abs",
+          "actual": 0.00039962797022496943,
+          "max_allowed": 0.05,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "severe_gulf",
+      "description": "Warm/moist Gulf severe profile parity against MetPy.",
+      "summary_path": "examples\\severe_gfs_verify_gulf\\metpy_compare\\comparison_summary.json",
+      "check_count": 30,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "products.sbcape.mean_abs",
+          "description": "surface CAPE mean abs",
+          "actual": 0.007208054507992647,
+          "max_allowed": 0.1,
+          "passed": true
+        },
+        {
+          "path": "products.sbcape.max_abs",
+          "description": "surface CAPE max abs",
+          "actual": 0.04439907125197351,
+          "max_allowed": 0.5,
+          "passed": true
+        },
+        {
+          "path": "products.sbcin.mean_abs",
+          "description": "surface CIN mean abs",
+          "actual": 8.906358403642179e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.sbcin.max_abs",
+          "description": "surface CIN max abs",
+          "actual": 0.003260432289067694,
+          "max_allowed": 0.05,
+          "passed": true
+        },
+        {
+          "path": "products.h_lcl.mean_abs",
+          "description": "surface LCL height mean abs",
+          "actual": 0.00017685118233963724,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.h_lcl.max_abs",
+          "description": "surface LCL height max abs",
+          "actual": 0.0005525177143681503,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mlcape.mean_abs",
+          "description": "mixed-layer CAPE mean abs",
+          "actual": 0.0036086822481650703,
+          "max_allowed": 0.1,
+          "passed": true
+        },
+        {
+          "path": "products.mlcape.max_abs",
+          "description": "mixed-layer CAPE max abs",
+          "actual": 0.025394447644202955,
+          "max_allowed": 0.5,
+          "passed": true
+        },
+        {
+          "path": "products.mlcin.mean_abs",
+          "description": "mixed-layer CIN mean abs",
+          "actual": 0.0001524252974840074,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mlcin.max_abs",
+          "description": "mixed-layer CIN max abs",
+          "actual": 0.001839835953092006,
+          "max_allowed": 0.05,
+          "passed": true
+        },
+        {
+          "path": "products.mucape.mean_abs",
+          "description": "most-unstable CAPE mean abs",
+          "actual": 0.007641048783007861,
+          "max_allowed": 0.1,
+          "passed": true
+        },
+        {
+          "path": "products.mucape.max_abs",
+          "description": "most-unstable CAPE max abs",
+          "actual": 0.04439907125197351,
+          "max_allowed": 0.5,
+          "passed": true
+        },
+        {
+          "path": "products.mucin.mean_abs",
+          "description": "most-unstable CIN mean abs",
+          "actual": 0.00014629213486232166,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mucin.max_abs",
+          "description": "most-unstable CIN max abs",
+          "actual": 0.0020152208200272526,
+          "max_allowed": 0.05,
+          "passed": true
+        },
+        {
+          "path": "products.mu_start_p.max_abs",
+          "description": "most-unstable parcel start pressure max abs",
+          "actual": 6.103515625e-05,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.shear06.max_abs",
+          "description": "0-6 km bulk shear max abs",
+          "actual": 4.431958032569128e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.rm_u.max_abs",
+          "description": "Bunkers right-mover u max abs",
+          "actual": 4.085597289815723e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.rm_v.max_abs",
+          "description": "Bunkers right-mover v max abs",
+          "actual": 2.0741160522419477e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.srh01.max_abs",
+          "description": "0-1 km SRH max abs",
+          "actual": 3.397887473965966e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.stp.max_abs",
+          "description": "STP max abs",
+          "actual": 2.135903800792871e-05,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.li.mean_abs",
+          "description": "lifted index mean abs",
+          "actual": 2.38951285799798e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.li.max_abs",
+          "description": "lifted index max abs",
+          "actual": 7.361195667954235e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.showalter.mean_abs",
+          "description": "Showalter index mean abs",
+          "actual": 1.6170577153925644e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.showalter.max_abs",
+          "description": "Showalter index max abs",
+          "actual": 5.259180531425045e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.k_index.mean_abs",
+          "description": "K-index mean abs",
+          "actual": 1.5728392252206352e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.k_index.max_abs",
+          "description": "K-index max abs",
+          "actual": 4.2736449103131235e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.total_totals.mean_abs",
+          "description": "total totals mean abs",
+          "actual": 1.9416789538682434e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.total_totals.max_abs",
+          "description": "total totals max abs",
+          "actual": 5.750698778683727e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.pwat.mean_abs",
+          "description": "precipitable water mean abs",
+          "actual": 0.0006164821088042001,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.pwat.max_abs",
+          "description": "precipitable water max abs",
+          "actual": 0.0012289116983650317,
+          "max_allowed": 0.05,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "severe_southeast_f006",
+      "description": "Nocturnal Southeast GFS +6h severe-profile parity against MetPy.",
+      "summary_path": "examples\\severe_gfs_verify_f006\\metpy_compare\\comparison_summary.json",
+      "check_count": 30,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "products.sbcape.mean_abs",
+          "description": "surface CAPE mean abs",
+          "actual": 0.004277826695818858,
+          "max_allowed": 0.1,
+          "passed": true
+        },
+        {
+          "path": "products.sbcape.max_abs",
+          "description": "surface CAPE max abs",
+          "actual": 0.03632828719491954,
+          "max_allowed": 0.5,
+          "passed": true
+        },
+        {
+          "path": "products.sbcin.mean_abs",
+          "description": "surface CIN mean abs",
+          "actual": 0.000354195270148392,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.sbcin.max_abs",
+          "description": "surface CIN max abs",
+          "actual": 0.017154635385734807,
+          "max_allowed": 0.05,
+          "passed": true
+        },
+        {
+          "path": "products.h_lcl.mean_abs",
+          "description": "surface LCL height mean abs",
+          "actual": 0.00018215128360428898,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.h_lcl.max_abs",
+          "description": "surface LCL height max abs",
+          "actual": 0.00040716925298056594,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mlcape.mean_abs",
+          "description": "mixed-layer CAPE mean abs",
+          "actual": 0.0021977561682135437,
+          "max_allowed": 0.1,
+          "passed": true
+        },
+        {
+          "path": "products.mlcape.max_abs",
+          "description": "mixed-layer CAPE max abs",
+          "actual": 0.026278265540668144,
+          "max_allowed": 0.5,
+          "passed": true
+        },
+        {
+          "path": "products.mlcin.mean_abs",
+          "description": "mixed-layer CIN mean abs",
+          "actual": 0.00011230741513820885,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mlcin.max_abs",
+          "description": "mixed-layer CIN max abs",
+          "actual": 0.00104241655841264,
+          "max_allowed": 0.05,
+          "passed": true
+        },
+        {
+          "path": "products.mucape.mean_abs",
+          "description": "most-unstable CAPE mean abs",
+          "actual": 0.004494052446097324,
+          "max_allowed": 0.1,
+          "passed": true
+        },
+        {
+          "path": "products.mucape.max_abs",
+          "description": "most-unstable CAPE max abs",
+          "actual": 0.03632828719491954,
+          "max_allowed": 0.5,
+          "passed": true
+        },
+        {
+          "path": "products.mucin.mean_abs",
+          "description": "most-unstable CIN mean abs",
+          "actual": 0.0001426767009887581,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mucin.max_abs",
+          "description": "most-unstable CIN max abs",
+          "actual": 0.0014614030082142904,
+          "max_allowed": 0.05,
+          "passed": true
+        },
+        {
+          "path": "products.mu_start_p.max_abs",
+          "description": "most-unstable parcel start pressure max abs",
+          "actual": 5.859375005456968e-05,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.shear06.max_abs",
+          "description": "0-6 km bulk shear max abs",
+          "actual": 3.432409677373016e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.rm_u.max_abs",
+          "description": "Bunkers right-mover u max abs",
+          "actual": 4.2692560626278464e-05,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.rm_v.max_abs",
+          "description": "Bunkers right-mover v max abs",
+          "actual": 2.6739913380868785e-05,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.srh01.max_abs",
+          "description": "0-1 km SRH max abs",
+          "actual": 0.0004454569651670681,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.stp.max_abs",
+          "description": "STP max abs",
+          "actual": 3.0348723115469767e-05,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.li.mean_abs",
+          "description": "lifted index mean abs",
+          "actual": 1.779519627256204e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.li.max_abs",
+          "description": "lifted index max abs",
+          "actual": 6.499282653749106e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.showalter.mean_abs",
+          "description": "Showalter index mean abs",
+          "actual": 1.4622368990133272e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.showalter.max_abs",
+          "description": "Showalter index max abs",
+          "actual": 4.5616399944492514e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.k_index.mean_abs",
+          "description": "K-index mean abs",
+          "actual": 1.5451820223079593e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.k_index.max_abs",
+          "description": "K-index max abs",
+          "actual": 4.226857720368571e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.total_totals.mean_abs",
+          "description": "total totals mean abs",
+          "actual": 1.8168087031932872e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.total_totals.max_abs",
+          "description": "total totals max abs",
+          "actual": 5.564884071418419e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.pwat.mean_abs",
+          "description": "precipitable water mean abs",
+          "actual": 0.00046929429107424515,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.pwat.max_abs",
+          "description": "precipitable water max abs",
+          "actual": 0.0011771524636969843,
+          "max_allowed": 0.05,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "severe_florida_elevated_f012",
+      "description": "Elevated Florida GFS +12h severe-profile parity against MetPy.",
+      "summary_path": "examples\\severe_gfs_verify_f012\\metpy_compare\\comparison_summary.json",
+      "check_count": 30,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "products.sbcape.mean_abs",
+          "description": "surface CAPE mean abs",
+          "actual": 0.004451514974022582,
+          "max_allowed": 0.1,
+          "passed": true
+        },
+        {
+          "path": "products.sbcape.max_abs",
+          "description": "surface CAPE max abs",
+          "actual": 0.035431650648206414,
+          "max_allowed": 0.5,
+          "passed": true
+        },
+        {
+          "path": "products.sbcin.mean_abs",
+          "description": "surface CIN mean abs",
+          "actual": 0.00021352031580190042,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.sbcin.max_abs",
+          "description": "surface CIN max abs",
+          "actual": 0.0029944376342712076,
+          "max_allowed": 0.05,
+          "passed": true
+        },
+        {
+          "path": "products.h_lcl.mean_abs",
+          "description": "surface LCL height mean abs",
+          "actual": 0.00015441209298130013,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.h_lcl.max_abs",
+          "description": "surface LCL height max abs",
+          "actual": 0.0004307281479896119,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mlcape.mean_abs",
+          "description": "mixed-layer CAPE mean abs",
+          "actual": 0.0011005344334681522,
+          "max_allowed": 0.1,
+          "passed": true
+        },
+        {
+          "path": "products.mlcape.max_abs",
+          "description": "mixed-layer CAPE max abs",
+          "actual": 0.00796068536118355,
+          "max_allowed": 0.5,
+          "passed": true
+        },
+        {
+          "path": "products.mlcin.mean_abs",
+          "description": "mixed-layer CIN mean abs",
+          "actual": 0.00017606511466825524,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mlcin.max_abs",
+          "description": "mixed-layer CIN max abs",
+          "actual": 0.0013334868870202854,
+          "max_allowed": 0.05,
+          "passed": true
+        },
+        {
+          "path": "products.mucape.mean_abs",
+          "description": "most-unstable CAPE mean abs",
+          "actual": 0.004933951651730524,
+          "max_allowed": 0.1,
+          "passed": true
+        },
+        {
+          "path": "products.mucape.max_abs",
+          "description": "most-unstable CAPE max abs",
+          "actual": 0.035431650648206414,
+          "max_allowed": 0.5,
+          "passed": true
+        },
+        {
+          "path": "products.mucin.mean_abs",
+          "description": "most-unstable CIN mean abs",
+          "actual": 0.0004475096360832486,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.mucin.max_abs",
+          "description": "most-unstable CIN max abs",
+          "actual": 0.003471303182493557,
+          "max_allowed": 0.05,
+          "passed": true
+        },
+        {
+          "path": "products.mu_start_p.max_abs",
+          "description": "most-unstable parcel start pressure max abs",
+          "actual": 4.8828125045474735e-05,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.shear06.max_abs",
+          "description": "0-6 km bulk shear max abs",
+          "actual": 2.091202262022307e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.rm_u.max_abs",
+          "description": "Bunkers right-mover u max abs",
+          "actual": 1.6320247340217975e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.rm_v.max_abs",
+          "description": "Bunkers right-mover v max abs",
+          "actual": 1.4145660562903117e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.srh01.max_abs",
+          "description": "0-1 km SRH max abs",
+          "actual": 3.0510378564940766e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.stp.max_abs",
+          "description": "STP max abs",
+          "actual": 7.868641999919657e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "products.li.mean_abs",
+          "description": "lifted index mean abs",
+          "actual": 1.7586576054016554e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.li.max_abs",
+          "description": "lifted index max abs",
+          "actual": 4.925266011923668e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.showalter.mean_abs",
+          "description": "Showalter index mean abs",
+          "actual": 1.4632517323958865e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.showalter.max_abs",
+          "description": "Showalter index max abs",
+          "actual": 4.573484267211825e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.k_index.mean_abs",
+          "description": "K-index mean abs",
+          "actual": 1.740127063721864e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.k_index.max_abs",
+          "description": "K-index max abs",
+          "actual": 4.1362161027791444e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.total_totals.mean_abs",
+          "description": "total totals mean abs",
+          "actual": 2.2686263429134168e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "products.total_totals.max_abs",
+          "description": "total totals max abs",
+          "actual": 5.574963370236219e-05,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.pwat.mean_abs",
+          "description": "precipitable water mean abs",
+          "actual": 0.0007869517688509642,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "products.pwat.max_abs",
+          "description": "precipitable water max abs",
+          "actual": 0.0012530414115090593,
+          "max_allowed": 0.05,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "hrrr_decode",
+      "description": "HRRR 2-m temperature decode parity against cfgrib.",
+      "summary_path": "examples\\hrrr_decode_verify\\comparison_summary.json",
+      "check_count": 5,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "field.mean_abs",
+          "description": "decoded field mean abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.rmse",
+          "description": "decoded field rmse",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.max_abs",
+          "description": "decoded field max abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.p99_abs",
+          "description": "decoded field p99 abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.mean_bias",
+          "description": "decoded field mean bias",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "rap_decode",
+      "description": "RAP 2-m temperature decode parity against cfgrib.",
+      "summary_path": "examples\\rap_decode_verify\\comparison_summary.json",
+      "check_count": 5,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "field.mean_abs",
+          "description": "decoded field mean abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.rmse",
+          "description": "decoded field rmse",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.max_abs",
+          "description": "decoded field max abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.p99_abs",
+          "description": "decoded field p99 abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.mean_bias",
+          "description": "decoded field mean bias",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "nam_decode",
+      "description": "NAM 2-m temperature decode parity against cfgrib.",
+      "summary_path": "examples\\nam_decode_verify\\comparison_summary.json",
+      "check_count": 5,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "field.mean_abs",
+          "description": "decoded field mean abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.rmse",
+          "description": "decoded field rmse",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.max_abs",
+          "description": "decoded field max abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.p99_abs",
+          "description": "decoded field p99 abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.mean_bias",
+          "description": "decoded field mean bias",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "ecmwf_decode",
+      "description": "ECMWF open-data 2-m field decode parity against cfgrib.",
+      "summary_path": "examples\\ecmwf_decode_verify\\comparison_summary.json",
+      "check_count": 5,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "field.mean_abs",
+          "description": "decoded field mean abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.rmse",
+          "description": "decoded field rmse",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.max_abs",
+          "description": "decoded field max abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.p99_abs",
+          "description": "decoded field p99 abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.mean_bias",
+          "description": "decoded field mean bias",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "era5_decode",
+      "description": "ERA5 2-m temperature decode parity against cfgrib.",
+      "summary_path": "examples\\era5_decode_verify\\comparison_summary.json",
+      "check_count": 5,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "field.mean_abs",
+          "description": "decoded field mean abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.rmse",
+          "description": "decoded field rmse",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.max_abs",
+          "description": "decoded field max abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.p99_abs",
+          "description": "decoded field p99 abs",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        },
+        {
+          "path": "field.mean_bias",
+          "description": "decoded field mean bias",
+          "actual": 0.0,
+          "max_allowed": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "thermo_profiles",
+      "description": "Standalone thermo/profile parity against MetPy on fixed sounding cases.",
+      "summary_path": "examples\\thermo_profile_verify\\comparison_summary.json",
+      "check_count": 33,
+      "failed_checks": 0,
+      "passed": true,
+      "checks": [
+        {
+          "path": "cases.metpy_doc_profile.lcl_pressure_hpa.max_abs",
+          "description": "metpy_doc_profile LCL pressure max abs",
+          "actual": 0.0,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.metpy_doc_profile.lcl_temperature_c.max_abs",
+          "description": "metpy_doc_profile LCL temperature max abs",
+          "actual": 0.0,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.metpy_doc_profile.wet_bulb_temperature_c.max_abs",
+          "description": "metpy_doc_profile wet-bulb temperature max abs",
+          "actual": 3.115508054207794e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "cases.metpy_doc_profile.wet_bulb_potential_temperature_k.max_abs",
+          "description": "metpy_doc_profile wet-bulb potential temperature max abs",
+          "actual": 0.0,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.metpy_doc_profile.lifted_index_c.max_abs",
+          "description": "metpy_doc_profile lifted index max abs",
+          "actual": 3.323408361488589e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "cases.metpy_doc_profile.showalter_index_c.max_abs",
+          "description": "metpy_doc_profile showalter index max abs",
+          "actual": 1.7771035411229263e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "cases.metpy_doc_profile.k_index_c.max_abs",
+          "description": "metpy_doc_profile K-index max abs",
+          "actual": 0.0,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.metpy_doc_profile.total_totals_c.max_abs",
+          "description": "metpy_doc_profile total totals max abs",
+          "actual": 0.0,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.metpy_doc_profile.precipitable_water_mm.max_abs",
+          "description": "metpy_doc_profile PWAT max abs",
+          "actual": 0.0011074562094179896,
+          "max_allowed": 0.005,
+          "passed": true
+        },
+        {
+          "path": "cases.metpy_doc_profile.downdraft_cape_jkg.max_abs",
+          "description": "metpy_doc_profile DCAPE max abs",
+          "actual": 0.0004099931304608617,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "cases.metpy_doc_profile.parcel_profile_500_c.max_abs",
+          "description": "metpy_doc_profile parcel profile max abs",
+          "actual": 3.323408361532998e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "cases.plains_profile.lcl_pressure_hpa.max_abs",
+          "description": "plains_profile LCL pressure max abs",
+          "actual": 6.821210263296962e-13,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.plains_profile.lcl_temperature_c.max_abs",
+          "description": "plains_profile LCL temperature max abs",
+          "actual": 5.684341886080802e-14,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.plains_profile.wet_bulb_temperature_c.max_abs",
+          "description": "plains_profile wet-bulb temperature max abs",
+          "actual": 5.330980947348962e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "cases.plains_profile.wet_bulb_potential_temperature_k.max_abs",
+          "description": "plains_profile wet-bulb potential temperature max abs",
+          "actual": 5.684341886080802e-14,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.plains_profile.lifted_index_c.max_abs",
+          "description": "plains_profile lifted index max abs",
+          "actual": 1.8151750172279435e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "cases.plains_profile.showalter_index_c.max_abs",
+          "description": "plains_profile showalter index max abs",
+          "actual": 1.6153561730902766e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "cases.plains_profile.k_index_c.max_abs",
+          "description": "plains_profile K-index max abs",
+          "actual": 0.0,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.plains_profile.total_totals_c.max_abs",
+          "description": "plains_profile total totals max abs",
+          "actual": 0.0,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.plains_profile.precipitable_water_mm.max_abs",
+          "description": "plains_profile PWAT max abs",
+          "actual": 0.0005220773449110538,
+          "max_allowed": 0.005,
+          "passed": true
+        },
+        {
+          "path": "cases.plains_profile.downdraft_cape_jkg.max_abs",
+          "description": "plains_profile DCAPE max abs",
+          "actual": 0.002196227736021683,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "cases.plains_profile.parcel_profile_500_c.max_abs",
+          "description": "plains_profile parcel profile max abs",
+          "actual": 1.8151750172279435e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "cases.tropical_profile.lcl_pressure_hpa.max_abs",
+          "description": "tropical_profile LCL pressure max abs",
+          "actual": 0.0,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.tropical_profile.lcl_temperature_c.max_abs",
+          "description": "tropical_profile LCL temperature max abs",
+          "actual": 0.0,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.tropical_profile.wet_bulb_temperature_c.max_abs",
+          "description": "tropical_profile wet-bulb temperature max abs",
+          "actual": 5.0820053303368695e-06,
+          "max_allowed": 0.0001,
+          "passed": true
+        },
+        {
+          "path": "cases.tropical_profile.wet_bulb_potential_temperature_k.max_abs",
+          "description": "tropical_profile wet-bulb potential temperature max abs",
+          "actual": 1.1368683772161603e-13,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.tropical_profile.lifted_index_c.max_abs",
+          "description": "tropical_profile lifted index max abs",
+          "actual": 3.186292768386778e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "cases.tropical_profile.showalter_index_c.max_abs",
+          "description": "tropical_profile showalter index max abs",
+          "actual": 1.6035284862603305e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        },
+        {
+          "path": "cases.tropical_profile.k_index_c.max_abs",
+          "description": "tropical_profile K-index max abs",
+          "actual": 0.0,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.tropical_profile.total_totals_c.max_abs",
+          "description": "tropical_profile total totals max abs",
+          "actual": 0.0,
+          "max_allowed": 1e-09,
+          "passed": true
+        },
+        {
+          "path": "cases.tropical_profile.precipitable_water_mm.max_abs",
+          "description": "tropical_profile PWAT max abs",
+          "actual": 0.0011888646918265522,
+          "max_allowed": 0.005,
+          "passed": true
+        },
+        {
+          "path": "cases.tropical_profile.downdraft_cape_jkg.max_abs",
+          "description": "tropical_profile DCAPE max abs",
+          "actual": 0.0007214220493096946,
+          "max_allowed": 0.01,
+          "passed": true
+        },
+        {
+          "path": "cases.tropical_profile.parcel_profile_500_c.max_abs",
+          "description": "tropical_profile parcel profile max abs",
+          "actual": 3.18629276829796e-05,
+          "max_allowed": 0.001,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "case_count": 15,
+    "check_count": 253,
+    "failed_checks": 0,
+    "passed": true
+  }
+}

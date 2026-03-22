@@ -1,0 +1,12 @@
+[package]
+name = "wx-calc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Canonical meteorological calculations for wxforge"
+
+[dependencies]
+wx-types = { path = "../wx-types" }
+
+[lib]
+path = "src/lib.rs"

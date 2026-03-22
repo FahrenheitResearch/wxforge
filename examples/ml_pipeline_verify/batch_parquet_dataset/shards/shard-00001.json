@@ -1,0 +1,15 @@
+{
+  "dataset_name": "sample-batch-parquet-dataset",
+  "sample_count": 1,
+  "samples": [
+    {
+      "channel_count": 1,
+      "relative_dir": "era5_surface",
+      "sample_id": "era5_surface",
+      "shard_index": 1,
+      "source": "examples/era5_2t_subset.grib",
+      "split": "Test"
+    }
+  ],
+  "shard_index": 1
+}
