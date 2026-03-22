@@ -1,47 +1,30 @@
 # wxforge
 
-All-Rust weather and ML data pipeline. Fetch, decode, calculate, render, and export training-ready datasets from operational NWP models -- no C or Python dependencies in the core.
+All-Rust weather data pipeline for ML training. Fetches GRIB from operational NWP models, decodes natively, computes derived fields, and exports training-ready datasets.
 
-**22,488 lines** across **9 crates**, one CLI binary, one mission: turn raw GRIB into training data as fast as the hardware allows.
-
-```
-wxforge fetch  -->  wxforge decode  -->  wxforge calc  -->  wxforge train plan  -->  wxforge train build
-                                                                                         |
-                                                                            Training-ready NPY / Parquet / WebDataset
-```
-
----
+27,559 lines of Rust across 9 crates. Single binary. One `cargo build --release`. No eccodes, no Fortran, no C dependencies.
 
 ## Quick Start
 
-### Prerequisites
-
-- [Rust](https://rustup.rs/) (1.75+ recommended)
-- Git
-
-### Build
-
 ```bash
-git clone https://github.com/your-org/wxforge.git
+git clone <repo-url>
 cd wxforge
 cargo build --release
 ```
 
-The release binary lands at `target/release/wxforge`.
-
-### Run your first command
+The binary lands at `target/release/wxforge`.
 
 ```bash
 # List supported models
 wxforge models
 
-# Fetch HRRR 2-m temperature via byte-range subset (~325 KB)
+# Fetch a single HRRR field via byte-range subset (~325 KB instead of ~80 MB)
 wxforge fetch model-subset \
   --model hrrr --product surface --forecast-hour 0 \
   --search "TMP:2 m above ground" \
   --output hrrr_tmp2m.grib2 --limit 1
 
-# Inspect what you downloaded
+# See what's in it
 wxforge scan-grib --file hrrr_tmp2m.grib2
 
 # Decode message 1
@@ -50,199 +33,57 @@ wxforge decode-grib --file hrrr_tmp2m.grib2 --message 1
 # Render to PNG
 wxforge render grib --file hrrr_tmp2m.grib2 --message 1 \
   --output hrrr_tmp2m.png --colormap heat
-```
 
----
+# Download full GRIBs in parallel (24 forecast hours, 4 concurrent)
+wxforge fetch batch \
+  --model hrrr --product surface \
+  --forecast-hours 0-23 --output-dir ./hrrr_data/ --parallelism 4
 
-## CLI Reference
-
-All commands are subcommands of the `wxforge` binary (or `cargo run -p wx-cli --bin wxforge --`).
-
-### `wxforge models`
-
-List every supported model with grid specs, sources, and available products.
-
-```bash
-wxforge models
-```
-
-### `wxforge fetch model-subset`
-
-Download specific GRIB fields via HTTP byte-range requests against `.idx` inventory files. Only the bytes you need cross the wire.
-
-```bash
-# Single field
-wxforge fetch model-subset \
-  --model hrrr --product surface --forecast-hour 0 \
-  --search "TMP:2 m above ground" \
-  --output hrrr_tmp2m.grib2 --limit 1
-
-# CAPE field (~325 KB instead of ~80 MB)
-wxforge fetch model-subset \
-  --model hrrr --product surface --forecast-hour 3 \
-  --search "CAPE:surface" \
-  --output hrrr_cape.grib2 --limit 1
-```
-
-### `wxforge fetch model-download`
-
-Download a complete GRIB file from an operational source. Supports authenticated CDS retrievals for ERA5.
-
-```bash
-# GFS surface analysis
-wxforge fetch model-download \
-  --model gfs --product surface --forecast-hour 0 \
-  --output gfs_surface.grib2
-
-# ERA5 2-m temperature over CONUS
-wxforge fetch model-download \
-  --model era5 --product surface --forecast-hour 0 \
-  --run 2024010100 --variables 2m_temperature \
-  --area 55,-130,20,-60 \
-  --output era5_2t.grib
-
-# ERA5 850 hPa temperature
-wxforge fetch model-download \
-  --model era5 --product pressure --forecast-hour 0 \
-  --run 2024010100 --variables temperature \
-  --pressure-level 850 --area 55,-130,20,-60 \
-  --output era5_t850.grib
-
-# Check what's available right now
-wxforge fetch model-download \
-  --model gfs --product surface --forecast-hour 0 \
-  --output gfs.grib2 --available
-```
-
-### `wxforge scan-grib`
-
-List every message in a GRIB file with variable, level, and packing metadata.
-
-```bash
-wxforge scan-grib --file hrrr_tmp2m.grib2
-```
-
-### `wxforge decode-grib`
-
-Decode a single message and print grid geometry, statistics, and sample values. Supports GRIB1 and GRIB2 (simple packing, complex+spatial differencing, JPEG 2000, CCSDS/AEC).
-
-```bash
-wxforge decode-grib --file hrrr_tmp2m.grib2 --message 1
-```
-
-### `wxforge calc thermo`
-
-Compute thermodynamic quantities from a single observation.
-
-```bash
+# Compute thermodynamic quantities
 wxforge calc thermo --temperature-c 20 --dewpoint-c 10 --pressure-hpa 850
 ```
 
-Output includes saturation vapor pressure, mixing ratio, theta-e, LCL, wet-bulb temperature, and more. All calculations are verified against MetPy to within instrument precision.
-
-### `wxforge render grib`
-
-Render a decoded GRIB message to a georeferenced PNG.
-
-```bash
-wxforge render grib \
-  --file era5_2t.grib --message 1 \
-  --output era5_2t.png --colormap heat
-```
-
-### `wxforge train job-init`
-
-Create an ML job specification for a given architecture and task.
-
-```bash
-wxforge train job-init \
-  --output job_spec.json \
-  --architecture swin-transformer \
-  --task forecasting \
-  --dataset-name hrrr_swin_demo
-```
-
-Supported architectures: `classical-ml`, `swin-transformer`, `diffusion`, `forecast-graph-network`, `custom`.
-
-### `wxforge train job-plan`
-
-Expand a job spec into a full training plan with dataset request, feature profiles, shard layout, and model recipe.
-
-```bash
-wxforge train job-plan --spec job_spec.json
-```
-
-### `wxforge train build-grib-sample`
-
-Build NPY arrays from decoded GRIB fields, ready for ingestion by PyTorch or NumPy.
-
-```bash
-wxforge train build-grib-sample \
-  --file hrrr_tmp2m.grib2 \
-  --output-dir sample_bundle \
-  --colormap heat
-```
-
----
-
 ## Supported Models
 
-| Model | Resolution | Grid | Source | Products |
-|-------|-----------|------|--------|----------|
-| **HRRR** | 3 km | 1799 x 1059 Lambert | NOAA NOMADS / AWS | surface, pressure |
-| **GFS** | 0.25 deg | 1440 x 721 lat-lon | NOAA NOMADS | surface, pressure |
-| **NAM** | 12 km | 614 x 428 Lambert | NOAA NOMADS | surface, pressure |
-| **RAP** | 13 km | 337 x 451 Lambert | NOAA NOMADS | surface, pressure |
-| **ECMWF IFS** | 0.25 deg | 1440 x 721 lat-lon | ECMWF Open Data | surface, pressure |
-| **ERA5** | 0.25 deg | 1440 x 721 lat-lon | CDS API | single-level, pressure-level |
+| Model | Resolution | Grid | Source | Subsetting |
+|-------|-----------|------|--------|------------|
+| HRRR | 3 km | 1799x1059 Lambert | NOAA NOMADS / AWS | `.idx` byte-range |
+| GFS | 0.25 deg | 1440x721 lat-lon | NOAA NOMADS | `.idx` byte-range |
+| NAM | 12 km | 614x428 Lambert | NOAA NOMADS | `.idx` byte-range |
+| RAP | 13 km | 337x451 Lambert | NOAA NOMADS | `.idx` byte-range |
+| ECMWF IFS | 0.25 deg | 1440x721 lat-lon | ECMWF Open Data | `.index` inventory |
+| ERA5 | 0.25 deg | 1440x721 lat-lon | CDS API | Authenticated retrieval |
 
-HRRR, GFS, NAM, and RAP use NOAA `.idx` inventory files for byte-range subsetting. ECMWF IFS uses `.index` inventories. ERA5 uses authenticated CDS API retrieval.
+Byte-range subsetting uses `.idx` inventory files to request only the fields you need. A single HRRR surface field is 300-400 KB; the full file is ~80 MB.
 
-CDS credentials are discovered from environment variables (`CDSAPI_URL` / `CDSAPI_KEY`) or config files (`~/.cdsapirc`, `~/.ecmwfdatastoresrc`).
-
----
+ERA5 credentials are discovered from `CDSAPI_URL`/`CDSAPI_KEY` environment variables or `~/.cdsapirc`.
 
 ## Architecture
 
-wxforge is a Cargo workspace of 9 crates, each with a single responsibility:
-
 | Crate | Lines | Role |
 |-------|-------|------|
-| **wx-types** | ~150 | Shared domain model: grids, fields, soundings, radar volumes, dataset specs |
-| **wx-grib** | ~2,800 | GRIB1/GRIB2 scanning, inventory parsing, message decode (simple, complex+spatial, JPEG 2000, CCSDS) |
-| **wx-fetch** | ~1,300 | Download planning, source templates, byte-range fetch, cache semantics, CDS retrieval |
-| **wx-calc** | ~7,400 | Thermodynamics, kinematics, severe weather indices -- verified against MetPy |
-| **wx-radar** | ~160 | NEXRAD palette parsing, value sampling, color table decode |
-| **wx-render** | ~130 | Deterministic PNG raster rendering with configurable colormaps |
-| **wx-export** | ~280 | Dataset manifests, export targets (Arrow, Parquet, WebDataset, Zarr) |
-| **wx-train** | ~950 | ML job specs, training plan expansion, NPY/shard dataset assembly |
-| **wx-cli** | ~4,800 | Single binary entrypoint -- all commands, argument parsing, orchestration |
-
-### Design principles
-
-- **Zero C/Python dependencies** in the core pipeline
-- **Verified calculations** -- thermo functions regression-tested against MetPy
-- **Deterministic rendering** -- same input always produces the same PNG
-- **Training export is first-class** -- not bolted on after the fact
-
----
+| `wx-types` | 153 | Domain model: grids, fields, soundings, radar volumes, dataset specs |
+| `wx-grib` | 2,814 | GRIB1/GRIB2 scanner, inventory parser, message decoder (simple, complex+spatial differencing, JPEG 2000, CCSDS/AEC) |
+| `wx-fetch` | 1,305 | Download planning, source templates, byte-range fetch, cache semantics, CDS retrieval |
+| `wx-calc` | 7,391 | Thermodynamics, kinematics, severe weather indices -- 199 functions verified against MetPy |
+| `wx-radar` | 159 | NEXRAD palette parsing, value sampling, color table decode |
+| `wx-render` | 133 | Deterministic PNG rasterization with configurable colormaps |
+| `wx-export` | 283 | Dataset manifests, export targets (Arrow, Parquet, WebDataset, Zarr) |
+| `wx-train` | 948 | ML job specs, training plan expansion, NPY/shard dataset assembly |
+| `wx-cli` | 5,057 | Single binary entrypoint -- all commands, argument parsing, orchestration |
 
 ## Training Pipeline
 
-The training pipeline supports end-to-end workflows from raw GRIB to GPU-ready tensors.
+The pipeline goes from raw GRIB to GPU-ready tensors. Job planning is architecture-aware:
 
-### Architecture-aware job planning
+| Architecture | Export Format | Shard Size |
+|-------------|-------------|------------|
+| Classical ML (XGBoost) | Parquet | 16 samples |
+| Swin Transformer | WebDataset | 96 samples |
+| Diffusion (UNet/DiT) | WebDataset | 128 samples |
+| Forecast Graph Network | Parquet | 48 samples |
 
-Each ML architecture gets tailored defaults for feature profiles, export format, shard layout, and parallelism:
-
-| Architecture | Export Format | Features | Shard Size |
-|-------------|-------------|----------|------------|
-| Classical ML (XGBoost) | Parquet | surface_core, severe_diagnostics, tabular_stats | 16 samples |
-| Swin Transformer | WebDataset | surface_core, pressure_core, severe_diagnostics | 96 samples |
-| Diffusion (UNet/DiT) | WebDataset | surface_core, pressure_core, thermodynamic_profiles | 128 samples |
-| Forecast Graph Network | Parquet | surface_core, pressure_core | 48 samples |
-
-### Example workflow
+### Workflow
 
 ```bash
 # 1. Create a job spec
@@ -252,25 +93,34 @@ wxforge train job-init \
   --task forecasting \
   --dataset-name hrrr_forecast
 
-# 2. Expand to full training plan
+# 2. Expand to full training plan (features, shards, model recipe)
 wxforge train job-plan --spec job.json
 
-# 3. Build dataset from GRIB files
+# 3. Build NPY arrays from GRIB files
 wxforge train build-grib-sample \
   --file hrrr_surface.grib2 \
   --output-dir training_data/ \
   --colormap heat
 ```
 
-### Job spec files
+Supported architectures: `classical-ml`, `swin-transformer`, `diffusion`, `forecast-graph-network`, `custom`.
 
-Job specs are JSON files that declaratively define a training run. See `examples/agent_job_swin.json` and `examples/agent_job_classical.json` for complete examples.
+### Working Training Examples
 
----
+Four end-to-end examples in `examples/training/`, each tested on a fresh Linux node (clone, build, fetch, train, inference) on a Blackwell GPU:
+
+| Script | Task | Architecture |
+|--------|------|-------------|
+| `train_unet.py` | CAPE regression from surface fields | UNet (3-level encoder/decoder + skip connections) |
+| `train_classifier.py` | Severe weather classification | MLP classifier |
+| `train_swin.py` | 3-hour forecast | Swin Transformer |
+| `train_diffusion.py` | Super-resolution | Diffusion model |
+
+Each script calls `wxforge fetch batch` and `wxforge train build-grib-sample` to build its own dataset, then trains with PyTorch.
 
 ## Python Integration
 
-The `wxforge-data` package provides PyTorch dataset loaders for wxforge-exported training data. It reads NPY/JSON artifacts produced by `wxforge train build-*` and presents them as standard `torch.utils.data.Dataset` objects.
+The `wxforge_data` package provides PyTorch dataset loaders for wxforge-exported data.
 
 ```bash
 pip install -e python/
@@ -286,59 +136,47 @@ ds = WxforgeDataset("training_data/sample_bundle")
 ds = WxforgeMultiSampleDataset("training_data/")
 ```
 
-The Python package does **not** depend on the wxforge binary at runtime.
+The Python package reads NPY/JSON artifacts produced by `wxforge train build-*` and does not depend on the wxforge binary at runtime.
 
----
+## CLI Reference
 
-## Benchmarks
+| Command | Description |
+|---------|-------------|
+| `wxforge models` | List all supported models with grid specs and sources |
+| `wxforge fetch model-subset` | Download specific fields via byte-range `.idx` requests |
+| `wxforge fetch model-download` | Download a complete GRIB file (supports ERA5 CDS auth) |
+| `wxforge fetch batch` | Download full GRIBs for multiple forecast hours in parallel |
+| `wxforge scan-grib` | List every message in a GRIB file |
+| `wxforge decode-grib` | Decode a message and print grid geometry, stats, sample values |
+| `wxforge calc thermo` | Compute thermodynamic quantities from a single observation |
+| `wxforge render grib` | Render a decoded GRIB message to georeferenced PNG |
+| `wxforge train job-init` | Create an ML job spec for a given architecture and task |
+| `wxforge train job-plan` | Expand a job spec into a full training plan |
+| `wxforge train build-grib-sample` | Build NPY arrays from decoded GRIB fields |
 
-Measured on a desktop workstation (Windows 11, NVMe SSD, residential broadband):
+## Timings
+
+Measured on a desktop (Windows 11, NVMe SSD, residential internet):
 
 | Operation | Result |
 |-----------|--------|
-| Fetch HRRR CAPE via `.idx` byte-range | ~325 KB transferred in ~1 s |
-| Decode 1799 x 1059 GRIB2 message | Instant (< 10 ms) |
-| Full E2E: fetch, decode, plan, build | < 5 s |
+| Fetch single HRRR field via `.idx` | ~325 KB in ~1s |
+| Decode 1799x1059 GRIB2 message | <10ms |
+| Full end-to-end (fetch + decode + plan + build) | <5s |
 | 24 forecast hours x 9 fields | ~80 MB total transfer |
-
-Byte-range subsetting is the key: a full HRRR surface file is ~80 MB, but a single field is 300-400 KB. The `.idx` inventory tells wxforge exactly which bytes to request.
-
----
 
 ## Verification
 
-wxforge includes a comprehensive verification suite that regression-tests thermodynamic calculations against MetPy:
+Thermodynamic calculations are regression-tested against MetPy:
 
 ```bash
-# Run the MetPy regression suite
 python examples/metpy_regression_suite.py
-
-# Run the full verification suite
 python examples/verification_suite.py
-
-# Benchmark the pipeline
-python examples/benchmark_suite.py
 ```
 
-Reports are written to `examples/` as JSON for automated comparison.
-
----
-
-## Roadmap
-
-- Broader GRIB2 template coverage (PNG packing, run-length)
-- NEXRAD Level-II volume ingest and derived products
-- Expanded calc parity (vorticity, frontogenesis, PV)
-- Zarr and WebDataset export with streaming writes
-- Distributed fetch orchestration for multi-cycle bulk downloads
-- Python bindings via PyO3 for hybrid workflows
-- GPU-accelerated decode and rendering
-
----
+Reports are written to `examples/` as JSON.
 
 ## Documentation
-
-Detailed docs live in the `docs/` directory:
 
 - [Architecture](docs/ARCHITECTURE.md) -- crate graph and data flow
 - [Agent Jobs](docs/AGENT_JOBS.md) -- ML job spec format and planning
@@ -347,11 +185,9 @@ Detailed docs live in the `docs/` directory:
 - [Model Coverage](docs/MODEL_COVERAGE.md) -- per-model fetch/decode/render status
 - [Reference Matrix](docs/REFERENCE_MATRIX.md) -- mapping to predecessor repos
 
----
-
 ## Credits
 
-Built with [Codex](https://openai.com/codex). Thermodynamic calculations verified against [MetPy](https://unidata.github.io/MetPy/).
+Thermodynamic calculations verified against [MetPy](https://unidata.github.io/MetPy/). Color tables by [Solarpower07](https://github.com/Solarpower07).
 
 ## License
 
