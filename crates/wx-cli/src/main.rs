@@ -15,10 +15,10 @@ use wx_calc::{
     potential_temperature, relative_humidity_from_dewpoint, vorticity, wind_direction, wind_speed,
     CalcEngine,
 };
-use wx_export::{ChannelStats, ExportEngine, SampleChannelArtifact};
+use wx_export::{ChannelNormEntry, ChannelNormStats, ChannelStats, ExportEngine, SampleChannelArtifact};
 use wx_fetch::{
-    resolve_offset_length, supported_sources_for, FetchEngine, FetchRequest, ModelDownloadOptions,
-    ModelKind, ProductKind, SourceKind,
+    resolve_offset_length, supported_sources_for, FetchEngine, FetchPlan, FetchRequest,
+    ModelDownloadOptions, ModelKind, ProductKind, SourceKind,
 };
 use wx_grib::GribEngine;
 use wx_radar::{ColorTable, RadarEngine};
@@ -27,7 +27,8 @@ use wx_render::{
 };
 use wx_train::{
     plan_agent_job, AgentJobSpec, DatasetBuildManifest, DatasetSampleRef, DatasetSplit,
-    DatasetSplitCounts, GribDatasetBuildRequest, LearningTask, ModelArchitecture, TrainingPlan,
+    DatasetSplitCounts, GribDatasetBuildRequest, GribSampleInput, LearningTask, ModelArchitecture,
+    TrainingPlan,
 };
 use wx_types::{Grid2D, TrainingChannel};
 
@@ -189,6 +190,11 @@ enum TrainCommand {
         min: Option<f64>,
         #[arg(long)]
         max: Option<f64>,
+        /// Computed/derived channels to materialize (e.g. wind_speed,relative_humidity,stp).
+        /// When specified, the pipeline decodes raw GRIB fields and runs wx-calc computations
+        /// to produce the requested channels as NPY arrays.
+        #[arg(long, value_delimiter = ',')]
+        channels: Vec<String>,
     },
     BuildGribDataset {
         #[arg(long)]
@@ -267,6 +273,22 @@ enum FetchCommand {
         limit: Option<usize>,
         #[arg(long, default_value_t = true)]
         available: bool,
+    },
+    Batch {
+        #[arg(long, value_enum)]
+        model: ModelArg,
+        #[arg(long, value_enum)]
+        product: ProductArg,
+        #[arg(long)]
+        forecast_hours: String,
+        #[arg(long)]
+        output_dir: PathBuf,
+        #[arg(long, default_value_t = 4)]
+        parallelism: usize,
+        #[arg(long, value_enum)]
+        source: Option<SourceArg>,
+        #[arg(long)]
+        run: Option<String>,
     },
 }
 
@@ -530,6 +552,126 @@ fn main() -> Result<(), String> {
                 println!("source={:?}", plan.source);
                 println!("grib_url={}", plan.grib_url);
                 println!("idx_url={}", plan.idx_url);
+            }
+            FetchCommand::Batch {
+                model,
+                product,
+                forecast_hours,
+                output_dir,
+                parallelism,
+                source,
+                run,
+            } => {
+                let hours = parse_forecast_hours(&forecast_hours)?;
+                let engine = FetchEngine::new();
+                let now = Utc::now();
+                let model_kind: ModelKind = model.into();
+                let product_kind: ProductKind = product.into();
+                let source_kind: Option<SourceKind> = source.map(Into::into);
+                let run_time = match run {
+                    Some(run) => parse_run_time(&run)?,
+                    None => engine.latest_available_cycle_for(
+                        model_kind,
+                        product_kind,
+                        source_kind.as_ref().unwrap_or(&model_kind.default_source()),
+                        now,
+                        *hours.first().unwrap_or(&0),
+                        12,
+                    )?,
+                };
+                fs::create_dir_all(&output_dir).map_err(|e| {
+                    format!("failed to create output dir '{}': {e}", output_dir.display())
+                })?;
+                // Build plans for all forecast hours
+                let mut plans: Vec<(u16, FetchPlan)> = Vec::new();
+                for &fhr in &hours {
+                    let request = FetchRequest {
+                        model: model_kind,
+                        run_time,
+                        product: product_kind,
+                        forecast_hour: fhr,
+                        source: source_kind.clone(),
+                    };
+                    let plan = engine.plan(&request)?;
+                    plans.push((fhr, plan));
+                }
+                let total = plans.len();
+                println!(
+                    "batch: downloading {} forecast hours for {:?} {:?} run={} parallelism={}",
+                    total,
+                    model_kind,
+                    product_kind,
+                    run_time.format("%Y%m%d%Hz"),
+                    parallelism,
+                );
+                // Run async downloads with semaphore-limited concurrency
+                let rt = tokio::runtime::Runtime::new()
+                    .map_err(|e| format!("failed to create tokio runtime: {e}"))?;
+                let results = rt.block_on(async {
+                    let semaphore = Arc::new(tokio::sync::Semaphore::new(parallelism));
+                    let client = reqwest::Client::builder()
+                        .user_agent("wxforge/0.1")
+                        .build()
+                        .map_err(|e| format!("failed to create async client: {e}"))?;
+                    let completed = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+                    let mut handles = Vec::new();
+                    for (fhr, plan) in plans {
+                        let sem = semaphore.clone();
+                        let cl = client.clone();
+                        let dir = output_dir.clone();
+                        let done = completed.clone();
+                        let total_count = total;
+                        let url = plan.grib_url.clone();
+                        let file_name = format!("{:?}_f{:02}.grib2", model_kind, fhr).to_lowercase();
+                        handles.push(tokio::spawn(async move {
+                            let _permit = sem.acquire().await.map_err(|e| format!("semaphore error: {e}"))?;
+                            let dest = dir.join(&file_name);
+                            let response = cl.get(&url)
+                                .send()
+                                .await
+                                .map_err(|e| format!("GET f{fhr:02} failed: {e}"))?
+                                .error_for_status()
+                                .map_err(|e| format!("f{fhr:02} bad status: {e}"))?;
+                            let bytes = response.bytes()
+                                .await
+                                .map_err(|e| format!("f{fhr:02} body read failed: {e}"))?;
+                            fs::write(&dest, &bytes).map_err(|e| {
+                                format!("f{fhr:02} write to '{}' failed: {e}", dest.display())
+                            })?;
+                            let n = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
+                            println!(
+                                "[{}/{}] f{:02} -> {} ({} bytes)",
+                                n, total_count, fhr, dest.display(), bytes.len()
+                            );
+                            Ok::<(u16, u64), String>((fhr, bytes.len() as u64))
+                        }));
+                    }
+                    let mut results = Vec::new();
+                    for handle in handles {
+                        results.push(handle.await.map_err(|e| format!("task join error: {e}"))?);
+                    }
+                    Ok::<Vec<Result<(u16, u64), String>>, String>(results)
+                })?;
+                let mut total_bytes: u64 = 0;
+                let mut failures = 0u32;
+                for result in &results {
+                    match result {
+                        Ok((_, bytes)) => total_bytes += bytes,
+                        Err(e) => {
+                            eprintln!("error: {e}");
+                            failures += 1;
+                        }
+                    }
+                }
+                println!(
+                    "batch complete: {} succeeded, {} failed, {} total bytes",
+                    results.len() as u32 - failures,
+                    failures,
+                    total_bytes,
+                );
+                if failures > 0 {
+                    return Err(format!("{failures} download(s) failed"));
+                }
             }
         },
         Command::PlanFetch {
@@ -807,17 +949,32 @@ fn main() -> Result<(), String> {
                 colormap,
                 min,
                 max,
+                channels,
             } => {
-                build_grib_training_sample(
-                    &file,
-                    &output_dir,
-                    dataset_name,
-                    sample_id,
-                    messages,
-                    colormap,
-                    min,
-                    max,
-                )?;
+                if channels.is_empty() {
+                    build_grib_training_sample(
+                        &file,
+                        &output_dir,
+                        dataset_name,
+                        sample_id,
+                        messages,
+                        colormap,
+                        min,
+                        max,
+                    )?;
+                } else {
+                    build_grib_computed_sample(
+                        &file,
+                        &output_dir,
+                        dataset_name,
+                        sample_id,
+                        messages,
+                        colormap,
+                        min,
+                        max,
+                        channels,
+                    )?;
+                }
             }
             TrainCommand::BuildGribDataset {
                 manifest,
@@ -906,6 +1063,33 @@ fn print_model_summary(model: ModelKind) {
         model.default_source(),
         sources,
     );
+}
+
+fn parse_forecast_hours(raw: &str) -> Result<Vec<u16>, String> {
+    let raw = raw.trim();
+    if raw.contains('-') && !raw.contains(',') {
+        let parts: Vec<&str> = raw.splitn(2, '-').collect();
+        let start: u16 = parts[0]
+            .trim()
+            .parse()
+            .map_err(|e| format!("invalid range start '{}': {e}", parts[0]))?;
+        let end: u16 = parts[1]
+            .trim()
+            .parse()
+            .map_err(|e| format!("invalid range end '{}': {e}", parts[1]))?;
+        if end < start {
+            return Err(format!("range end {end} is less than start {start}"));
+        }
+        Ok((start..=end).collect())
+    } else {
+        raw.split(',')
+            .map(|s| {
+                s.trim()
+                    .parse::<u16>()
+                    .map_err(|e| format!("invalid forecast hour '{}': {e}", s.trim()))
+            })
+            .collect()
+    }
 }
 
 fn parse_run_time(raw: &str) -> Result<DateTime<Utc>, String> {
@@ -1100,6 +1284,91 @@ fn build_grib_training_sample(
     Ok(())
 }
 
+fn build_grib_computed_sample(
+    file: &PathBuf,
+    output_dir: &PathBuf,
+    dataset_name: Option<String>,
+    sample_id: Option<String>,
+    messages: Vec<u64>,
+    colormap: ColorMapArg,
+    min: Option<f64>,
+    max: Option<f64>,
+    channels: Vec<String>,
+) -> Result<(), String> {
+    let dataset_name = dataset_name.unwrap_or_else(|| format!("{}-dataset", safe_file_stem(file)));
+    let sample_id = sample_id.unwrap_or_else(|| safe_file_stem(file));
+
+    let channel_specs: Vec<TrainingChannel> = channels
+        .iter()
+        .map(|name| {
+            let units = infer_channel_units(name);
+            TrainingChannel {
+                name: name.clone(),
+                units,
+            }
+        })
+        .collect();
+
+    let sample = GribSampleInput {
+        file: file.display().to_string(),
+        sample_id: Some(sample_id.clone()),
+        messages,
+        companion_files: Vec::new(),
+    };
+
+    let sample_manifest = feature_materialize::write_planned_training_sample(
+        &sample,
+        output_dir,
+        dataset_name.clone(),
+        sample_id.clone(),
+        &channel_specs,
+        colormap.into(),
+        min,
+        max,
+    )?;
+
+    println!("wrote {}", output_dir.display());
+    println!("channels={}", sample_manifest.channel_count);
+    println!("dataset={}", sample_manifest.dataset_name);
+    println!("sample_id={}", sample_manifest.sample_id);
+    for channel in &sample_manifest.channels {
+        println!(
+            "  {} [{}] {}",
+            channel.name,
+            channel.level,
+            channel
+                .stats
+                .as_ref()
+                .map(|s| format!("min={:.2} mean={:.2} max={:.2} std={:.2} count={} nan_count={}", s.min, s.mean, s.max, s.std, s.count, s.nan_count))
+                .unwrap_or_else(|| "no stats".to_string())
+        );
+    }
+    Ok(())
+}
+
+fn infer_channel_units(name: &str) -> String {
+    match name.to_ascii_lowercase().as_str() {
+        "wind_speed" | "wind_speed_10m" | "shear06" => "m/s".to_string(),
+        "wind_direction" | "wind_direction_10m" => "degrees".to_string(),
+        "relative_humidity" | "rh2m" => "%".to_string(),
+        "t2m" | "d2m" | "t850" | "theta850" | "theta_e" | "wet_bulb"
+        | "wet_bulb_potential_temperature" => "K".to_string(),
+        "u10" | "v10" | "u850" | "v850" => "m/s".to_string(),
+        "mslp" => "Pa".to_string(),
+        "z500" => "gpm".to_string(),
+        "vort500" | "div500" => "1/s".to_string(),
+        "tadv850" => "K/s".to_string(),
+        "sbcape" | "mlcape" | "mucape" | "dcape" => "J/kg".to_string(),
+        "sbcin" | "mlcin" | "mucin" => "J/kg".to_string(),
+        "srh01" | "srh03" => "m2/s2".to_string(),
+        "stp" | "scp" => "1".to_string(),
+        "pwat" => "mm".to_string(),
+        "lcl_height" | "lfc_height" => "m".to_string(),
+        "reflectivity" => "dBZ".to_string(),
+        _ => "?".to_string(),
+    }
+}
+
 fn write_grib_training_sample(
     file: &PathBuf,
     output_dir: &PathBuf,
@@ -1165,11 +1434,11 @@ fn write_grib_training_sample(
 
         export.write_npy_f32_grid(&data_path, &field.grid)?;
 
-        let stats = if let Some((auto_min, mean, auto_max)) = field.min_mean_max() {
+        let stats = if let Some(full_stats) = compute_channel_stats(&field.grid) {
             let rgba = render_scalar_grid(
                 &field.grid,
-                min.unwrap_or(auto_min),
-                max.unwrap_or(auto_max),
+                min.unwrap_or(full_stats.min),
+                max.unwrap_or(full_stats.max),
                 colormap.into(),
             );
             write_png_rgba(
@@ -1178,11 +1447,7 @@ fn write_grib_training_sample(
                 field.grid.ny as u32,
                 &rgba,
             )?;
-            Some(ChannelStats {
-                min: auto_min,
-                mean,
-                max: auto_max,
-            })
+            Some(full_stats)
         } else {
             None
         };
@@ -1216,6 +1481,7 @@ fn write_grib_training_sample(
     );
     export
         .write_sample_bundle_manifest(output_dir.join("sample_manifest.json"), &sample_manifest)?;
+    write_channel_stats_json(output_dir, &sample_manifest.channels)?;
     Ok(sample_manifest)
 }
 
@@ -1954,4 +2220,72 @@ fn fetch_subset_from_locations(
         );
     }
     Ok(())
+}
+
+/// Compute full channel statistics (min, max, mean, std, count, nan_count) from a Grid2D.
+fn compute_channel_stats(grid: &Grid2D) -> Option<ChannelStats> {
+    let total = grid.values.len();
+    let mut count = 0usize;
+    let mut sum = 0.0f64;
+    let mut sum_sq = 0.0f64;
+    let mut min = f64::INFINITY;
+    let mut max = f64::NEG_INFINITY;
+
+    for value in &grid.values {
+        if value.is_nan() {
+            continue;
+        }
+        count += 1;
+        sum += *value;
+        sum_sq += *value * *value;
+        min = min.min(*value);
+        max = max.max(*value);
+    }
+
+    if count == 0 {
+        return None;
+    }
+
+    let mean = sum / count as f64;
+    let variance = (sum_sq / count as f64) - (mean * mean);
+    let std = if variance > 0.0 { variance.sqrt() } else { 0.0 };
+    let nan_count = total - count;
+
+    Some(ChannelStats {
+        min,
+        mean,
+        max,
+        std,
+        count,
+        nan_count,
+    })
+}
+
+/// Write `channel_stats.json` alongside the sample output for training normalization.
+fn write_channel_stats_json(
+    output_dir: &PathBuf,
+    artifacts: &[SampleChannelArtifact],
+) -> Result<(), String> {
+    let entries: Vec<ChannelNormEntry> = artifacts
+        .iter()
+        .filter_map(|artifact| {
+            artifact.stats.as_ref().map(|stats| ChannelNormEntry {
+                name: artifact.name.clone(),
+                units: artifact.units.clone(),
+                min: stats.min,
+                max: stats.max,
+                mean: stats.mean,
+                std: stats.std,
+                count: stats.count,
+                nan_count: stats.nan_count,
+            })
+        })
+        .collect();
+
+    let norm_stats = ChannelNormStats { channels: entries };
+    let json = serde_json::to_string_pretty(&norm_stats)
+        .map_err(|err| format!("failed to serialize channel_stats.json: {err}"))?;
+    let path = output_dir.join("channel_stats.json");
+    fs::write(&path, json)
+        .map_err(|err| format!("failed to write '{}': {err}", path.display()))
 }

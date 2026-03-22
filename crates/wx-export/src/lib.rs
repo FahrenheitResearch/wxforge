@@ -40,6 +40,31 @@ pub struct ChannelStats {
     pub min: f64,
     pub mean: f64,
     pub max: f64,
+    #[serde(default)]
+    pub std: f64,
+    #[serde(default)]
+    pub count: usize,
+    #[serde(default)]
+    pub nan_count: usize,
+}
+
+/// Per-channel normalization statistics for `channel_stats.json`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ChannelNormEntry {
+    pub name: String,
+    pub units: String,
+    pub min: f64,
+    pub max: f64,
+    pub mean: f64,
+    pub std: f64,
+    pub count: usize,
+    pub nan_count: usize,
+}
+
+/// Top-level structure written to `channel_stats.json`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ChannelNormStats {
+    pub channels: Vec<ChannelNormEntry>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -220,6 +245,9 @@ mod tests {
                     min: 251.0,
                     mean: 252.5,
                     max: 254.0,
+                    std: 1.118,
+                    count: 4,
+                    nan_count: 0,
                 }),
             }],
         );

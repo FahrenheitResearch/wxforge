@@ -7,11 +7,11 @@ use wx_calc::{
     bulk_shear_pressure, bunkers_storm_motion, cape_cin, dewpoint_from_relative_humidity,
     downdraft_cape, equivalent_potential_temperature, geospatial_gradient, k_index, lifted_index,
     mixed_layer_cape_cin, most_unstable_cape_cin, potential_temperature, precipitable_water,
-    showalter_index, significant_tornado_parameter, storm_relative_helicity,
-    supercell_composite_parameter, surface_based_cape_cin, total_totals,
-    wet_bulb_potential_temperature, wet_bulb_temperature,
+    relative_humidity_from_dewpoint, showalter_index, significant_tornado_parameter,
+    storm_relative_helicity, supercell_composite_parameter, surface_based_cape_cin, total_totals,
+    wet_bulb_potential_temperature, wet_bulb_temperature, wind_direction, wind_speed,
 };
-use wx_export::{ChannelStats, ExportEngine, SampleBundleManifest, SampleChannelArtifact};
+use wx_export::{ExportEngine, SampleBundleManifest, SampleChannelArtifact};
 use wx_grib::{DecodedField, GribEngine, MessageDescriptor};
 use wx_render::{render_scalar_grid, write_png_rgba, ColorMap};
 use wx_train::GribSampleInput;
@@ -73,19 +73,15 @@ pub fn write_planned_training_sample(
         let preview_path = output_dir.join(&preview_name);
 
         export.write_npy_f32_grid(&data_path, grid)?;
-        let stats = grid_stats(grid).map(|(auto_min, mean, auto_max)| {
+        let stats = crate::compute_channel_stats(grid).map(|full_stats| {
             let rgba = render_scalar_grid(
                 grid,
-                min.unwrap_or(auto_min),
-                max.unwrap_or(auto_max),
+                min.unwrap_or(full_stats.min),
+                max.unwrap_or(full_stats.max),
                 colormap,
             );
             let _ = write_png_rgba(&preview_path, grid.nx as u32, grid.ny as u32, &rgba);
-            ChannelStats {
-                min: auto_min,
-                mean,
-                max: auto_max,
-            }
+            full_stats
         });
         let preview_file = if stats.is_some() {
             Some(preview_name)
@@ -114,6 +110,7 @@ pub fn write_planned_training_sample(
         export.sample_bundle_manifest(&plan.export, sample_id, sample.file.clone(), artifacts);
     export
         .write_sample_bundle_manifest(output_dir.join("sample_manifest.json"), &sample_manifest)?;
+    crate::write_channel_stats_json(output_dir, &sample_manifest.channels)?;
     Ok(sample_manifest)
 }
 
@@ -169,6 +166,74 @@ fn materialize_channel_grids(
     for name in &requested {
         if let Some(grid) = materialize_raw_channel(fields, name)? {
             out.insert(name.clone(), grid);
+        }
+    }
+
+    // Computed surface-level channels: wind_speed, wind_direction, relative_humidity.
+    // These derive from pairs of raw fields that are typically available in any GRIB file.
+    let needs_surface_wind = requested.iter().any(|name| {
+        matches!(name.as_str(), "wind_speed" | "wind_speed_10m" | "wind_direction" | "wind_direction_10m")
+    });
+    if needs_surface_wind {
+        let u_field = find_surface_field(fields, &["10u", "u10"], 10.0)
+            .or_else(|| lowest_pressure_field(fields, &["u", "ugrd"]));
+        let v_field = find_surface_field(fields, &["10v", "v10"], 10.0)
+            .or_else(|| lowest_pressure_field(fields, &["v", "vgrd"]));
+        if let (Some(u_field), Some(v_field)) = (u_field, v_field) {
+            if requested.contains("wind_speed") || requested.contains("wind_speed_10m") {
+                let grid = apply_binary_grid(&u_field.grid, &v_field.grid, |u, v| {
+                    wind_speed(u, v)
+                })?;
+                if requested.contains("wind_speed") {
+                    out.insert("wind_speed".to_string(), grid.clone());
+                }
+                if requested.contains("wind_speed_10m") {
+                    out.insert("wind_speed_10m".to_string(), grid);
+                }
+            }
+            if requested.contains("wind_direction") || requested.contains("wind_direction_10m") {
+                let grid = apply_binary_grid(&u_field.grid, &v_field.grid, |u, v| {
+                    wind_direction(u, v)
+                })?;
+                if requested.contains("wind_direction") {
+                    out.insert("wind_direction".to_string(), grid.clone());
+                }
+                if requested.contains("wind_direction_10m") {
+                    out.insert("wind_direction_10m".to_string(), grid);
+                }
+            }
+        }
+    }
+
+    let needs_rh = requested.contains("relative_humidity") || requested.contains("rh2m");
+    if needs_rh {
+        // Try direct RH field first.
+        let rh_direct = find_surface_field(fields, &["r"], 2.0)
+            .or_else(|| find_any_field(fields, &["r", "rh"]));
+        if let Some(rh_field) = rh_direct {
+            if requested.contains("relative_humidity") && !out.contains_key("relative_humidity") {
+                out.insert("relative_humidity".to_string(), rh_field.grid.clone());
+            }
+            if requested.contains("rh2m") && !out.contains_key("rh2m") {
+                out.insert("rh2m".to_string(), rh_field.grid.clone());
+            }
+        } else {
+            // Compute from TMP and DPT (both in K in GRIB).
+            let t_field = find_surface_field(fields, &["2t", "t2m"], 2.0)
+                .or_else(|| lowest_pressure_field(fields, &["t", "tmp"]));
+            let d_field = find_surface_field(fields, &["2d", "d2m"], 2.0)
+                .or_else(|| lowest_pressure_field(fields, &["d", "dpt"]));
+            if let (Some(t_field), Some(d_field)) = (t_field, d_field) {
+                let grid = apply_binary_grid(&t_field.grid, &d_field.grid, |t_k, td_k| {
+                    relative_humidity_from_dewpoint(t_k - 273.15, td_k - 273.15)
+                })?;
+                if requested.contains("relative_humidity") {
+                    out.insert("relative_humidity".to_string(), grid.clone());
+                }
+                if requested.contains("rh2m") {
+                    out.insert("rh2m".to_string(), grid);
+                }
+            }
         }
     }
 
@@ -323,7 +388,9 @@ fn materialize_raw_channel(fields: &[DecodedField], name: &str) -> Result<Option
             }
             None
         }
-        "channel_min" | "channel_mean" | "channel_max" | "valid_hour_sin" | "valid_hour_cos" => {
+        "channel_min" | "channel_mean" | "channel_max" | "valid_hour_sin" | "valid_hour_cos"
+        | "wind_speed" | "wind_speed_10m" | "wind_direction" | "wind_direction_10m"
+        | "relative_humidity" | "rh2m" => {
             None
         }
         _ => find_any_field(fields, &[name]),
@@ -952,6 +1019,10 @@ fn inferred_channel_level(name: &str) -> String {
         "t850" | "theta850" | "u850" | "v850" | "tadv850" => "850 hPa".to_string(),
         "z500" | "vort500" | "div500" => "500 hPa".to_string(),
         "theta_e" | "wet_bulb" | "wet_bulb_potential_temperature" => "surface parcel".to_string(),
+        "wind_speed" | "wind_speed_10m" | "wind_direction" | "wind_direction_10m" => {
+            "10 m above ground".to_string()
+        }
+        "relative_humidity" | "rh2m" => "2 m above ground".to_string(),
         "sbcape" | "sbcin" | "mlcape" | "mlcin" | "mucape" | "mucin" | "srh01" | "srh03"
         | "shear06" | "stp" | "scp" | "pwat" | "lifted_index" | "li" | "showalter_index"
         | "showalter" | "k_index" | "total_totals" | "lcl_height" | "lfc_height" | "dcape" => {
@@ -973,23 +1044,3 @@ fn sanitize_channel_stem(name: &str) -> String {
     out
 }
 
-fn grid_stats(grid: &Grid2D) -> Option<(f64, f64, f64)> {
-    let mut count = 0usize;
-    let mut sum = 0.0;
-    let mut min = f64::INFINITY;
-    let mut max = f64::NEG_INFINITY;
-    for value in &grid.values {
-        if value.is_nan() {
-            continue;
-        }
-        count += 1;
-        sum += *value;
-        min = min.min(*value);
-        max = max.max(*value);
-    }
-    if count == 0 {
-        None
-    } else {
-        Some((min, sum / count as f64, max))
-    }
-}
