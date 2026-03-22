@@ -112,7 +112,7 @@ def main():
     samples = []
     for grib in gribs:
         dec = decode_grib(grib)
-        cape = find_field(dec, "CAPE_surface")
+        cape = find_field(dec, "cape_surface")
         if cape is not None:
             samples.append(cape)
             print(f"    {os.path.basename(grib)}: OK ({cape.shape})")

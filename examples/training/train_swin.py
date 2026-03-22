@@ -125,10 +125,10 @@ def main():
         dec = decode_grib(grib)
         basename = os.path.basename(grib)
         # Extract forecast hour from filename (e.g., hrrr_f03.grib2)
-        t = find_field(dec, "TMP_2_m")
-        cape = find_field(dec, "CAPE_surface")
+        t = find_field(dec, "2t_2_m")
+        cape = find_field(dec, "cape_surface")
         if t is not None and cape is not None:
-            fhr_fields[basename] = {"TMP": t, "CAPE": cape}
+            fhr_fields[basename] = {"2t": t, "cape": cape}
             print(f"    {basename}: OK ({t.shape})")
 
     # Build T -> T+LEAD pairs using sorted keys
@@ -139,8 +139,8 @@ def main():
         k_fut = sorted_keys[i + LEAD]
         now_data = fhr_fields[k_now]
         fut_data = fhr_fields[k_fut]
-        inp = np.stack([now_data["TMP"], now_data["CAPE"]], 0)
-        tgt = np.stack([fut_data["TMP"], fut_data["CAPE"]], 0)
+        inp = np.stack([now_data["2t"], now_data["cape"]], 0)
+        tgt = np.stack([fut_data["2t"], fut_data["cape"]], 0)
         pairs.append((inp, tgt))
 
     print(f"  Pairs: {len(pairs)} (t -> t+{LEAD}h)")
@@ -197,7 +197,7 @@ def main():
         stds.append(std)
     with torch.no_grad():
         pred = model(torch.from_numpy(ci[None]).to(DEVICE)).cpu().numpy()[0]
-    names = ["TMP:2m", "CAPE"]
+    names = ["TMP:2m", "cape"]
     for c in range(NC):
         pred[c] = pred[c] * stds[c] + mus[c]
         ct_un = tgt[c, y0:y0+CS, x0:x0+CS]

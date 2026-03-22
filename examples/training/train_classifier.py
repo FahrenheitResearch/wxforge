@@ -90,11 +90,11 @@ def main():
     features, labels = [], []
     for grib in gribs:
         dec = decode_grib(grib)
-        cape = find_field(dec, "CAPE_surface")
-        t = find_field(dec, "TMP_2_m")
-        d = find_field(dec, "DPT_2_m")
-        u = find_field(dec, "UGRD_10_m")
-        v = find_field(dec, "VGRD_10_m")
+        cape = find_field(dec, "cape_surface")
+        t = find_field(dec, "2t_2_m")
+        d = find_field(dec, "2d_2_m")
+        u = find_field(dec, "10u_10_m")
+        v = find_field(dec, "10v_10_m")
         if all(x is not None for x in [cape, t, d]):
             wspd_max = float(np.nanmax(np.sqrt(u**2 + v**2))) if u is not None and v is not None else 0.0
             feat = [float(np.nanmax(cape)), float(np.nanmean(cape)),

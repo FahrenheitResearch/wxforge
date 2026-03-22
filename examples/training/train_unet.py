@@ -103,11 +103,11 @@ def main():
     samples = []
     for grib in gribs:
         dec = decode_grib(grib)
-        t = find_field(dec, "TMP_2_m")
-        d = find_field(dec, "DPT_2_m")
-        u = find_field(dec, "UGRD_10_m")
-        v = find_field(dec, "VGRD_10_m")
-        cape = find_field(dec, "CAPE_surface")
+        t = find_field(dec, "2t_2_m")
+        d = find_field(dec, "2d_2_m")
+        u = find_field(dec, "10u_10_m")
+        v = find_field(dec, "10v_10_m")
+        cape = find_field(dec, "cape_surface")
         if all(x is not None for x in [t, d, u, v, cape]):
             samples.append((np.stack([t, d, u, v], 0), cape))
             print(f"    {os.path.basename(grib)}: OK ({t.shape})")
